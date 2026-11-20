@@ -1,0 +1,28 @@
+{
+  "name": "shree-ganga-fire-safety",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "prebuild": "node scripts/generate-seo.mjs",
+    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir .seo-ssr && node scripts/prerender-seo.mjs",
+    "preview": "vite preview",
+    "typecheck": "tsc -b --pretty",
+    "lint": "biome lint src/main.tsx src/site/App.tsx src/data/business.ts src/data/seo.ts src/entry-server.tsx src/vite-env.d.ts scripts/generate-seo.mjs scripts/prerender-seo.mjs vite.config.ts"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^7.18.5"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.6",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^6.3.0",
+    "typescript": "~5.8.3",
+    "vite": "^8.3.7"
+  }
+}
