@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from 'react'
+import { lazy, Suspense, useEffect, useRef, useState, type FormEvent, type KeyboardEvent as ReactKeyboardEvent, type RefObject } from 'react'
 import { Link, Navigate, NavLink, Route, Routes, useLocation, useParams } from 'react-router-dom'
 import ArrowDown from 'lucide-react/dist/esm/icons/arrow-down.js'
 import ArrowRight from 'lucide-react/dist/esm/icons/arrow-right.js'
@@ -13,11 +13,14 @@ import Images from 'lucide-react/dist/esm/icons/images.js'
 import Info from 'lucide-react/dist/esm/icons/info.js'
 import MapPin from 'lucide-react/dist/esm/icons/map-pin.js'
 import Menu from 'lucide-react/dist/esm/icons/menu.js'
-import MessageCircle from 'lucide-react/dist/esm/icons/message-circle.js'
+import Pause from 'lucide-react/dist/esm/icons/pause.js'
 import Phone from 'lucide-react/dist/esm/icons/phone.js'
+import Play from 'lucide-react/dist/esm/icons/play.js'
 import ShieldCheck from 'lucide-react/dist/esm/icons/shield-check.js'
 import Star from 'lucide-react/dist/esm/icons/star.js'
 import StarHalf from 'lucide-react/dist/esm/icons/star-half.js'
+import Sun from 'lucide-react/dist/esm/icons/sun.js'
+import Moon from 'lucide-react/dist/esm/icons/moon.js'
 import X from 'lucide-react/dist/esm/icons/x.js'
 import Wrench from 'lucide-react/dist/esm/icons/wrench.js'
 import { business, customerRatings, navLinks, projectPhotos, services, type Service } from '../data/business'
@@ -25,6 +28,8 @@ import { getSeoMetadata, getStructuredData } from '../data/seo'
 const ratingStarKeys = ['star-1', 'star-2', 'star-3', 'star-4', 'star-5'] as const
 const serviceOptions = [...services.map(service => ({ value: service.slug, label: service.title })), { value: 'other', label: 'Others...' }]
 const navIcons = { '/': House, '/about': Info, '/services': Wrench, '/projects': Images, '/reviews': Star }
+const GlassIconReveal = lazy(() => import('./GlassIconReveal').then(module => ({ default: module.GlassIconReveal })))
+const SHREE_GANGA_MARK = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 54"><path d="M24 3 43 10v14c0 13-8 22-19 27C13 46 5 37 5 24V10L24 3Z" fill="none" stroke="currentColor" stroke-width="2.5"/><path d="M24 14c1 7-6 9-6 16a6 6 0 0 0 12 0c0-4-3-7-3-12 5 5 9 10 9 16a12 12 0 1 1-24 0c0-8 6-13 12-20Z" fill="currentColor"/></svg>'
 
 function Metadata() {
   const { pathname } = useLocation()
@@ -55,23 +60,50 @@ function Metadata() {
   return null
 }
 
-function Logo({ onClick }: { onClick?: () => void }) {
+function BrandMark() {
+  return <svg role="presentation" viewBox="0 0 48 54"><path d="M24 3 43 10v14c0 13-8 22-19 27C13 46 5 37 5 24V10L24 3Z" fill="none" stroke="currentColor" strokeWidth="2.5"/><path d="M24 14c1 7-6 9-6 16a6 6 0 0 0 12 0c0-4-3-7-3-12 5 5 9 10 9 16a12 12 0 1 1-24 0c0-8 6-13 12-20Z" fill="currentColor"/></svg>
+}
+
+function Logo({ onClick, animateMark = false, darkMode = false }: { onClick?: () => void; animateMark?: boolean; darkMode?: boolean }) {
   return <Link className="brand" to="/" aria-label={`${business.name}, home`} onClick={onClick}>
-    <span className="brand-mark" aria-hidden="true"><svg role="presentation" viewBox="0 0 48 54"><path d="M24 3 43 10v14c0 13-8 22-19 27C13 46 5 37 5 24V10L24 3Z" fill="none" stroke="currentColor" strokeWidth="2.5"/><path d="M24 14c1 7-6 9-6 16a6 6 0 0 0 12 0c0-4-3-7-3-12 5 5 9 10 9 16a12 12 0 1 1-24 0c0-8 6-13 12-20Z" fill="currentColor"/></svg></span>
+    <span className={animateMark ? 'brand-mark brand-mark-animated' : 'brand-mark'} aria-hidden="true">
+      {animateMark ? <Suspense fallback={<BrandMark />}><GlassIconReveal className="header-brand-reveal" logo={SHREE_GANGA_MARK} background={darkMode ? '#1c1917' : '#faf7f5'} logoColor={darkMode ? '#f87171' : '#9b2c2c'} tileSize={48} logoScale={1.45} finalScale={1.1} loop={false} label="Shree Ganga" /></Suspense> : <BrandMark />}
+    </span>
     <span className="brand-type"><b>SHREE GANGA</b><small>FIRE &amp; SAFETY</small></span>
   </Link>
 }
 
 function Header() {
   const [open, setOpen] = useState(false)
-  return <header className="header"><div className="container header-inner"><Logo />
+  const [darkMode, setDarkMode] = useState(() => typeof document !== 'undefined' && document.documentElement.classList.contains('dark'))
+  const [scrolled, setScrolled] = useState(() => typeof window !== 'undefined' && window.scrollY > 10)
+  useEffect(() => {
+    const updateScrolled = () => setScrolled(window.scrollY > 10)
+    window.addEventListener('scroll', updateScrolled, { passive: true })
+    return () => window.removeEventListener('scroll', updateScrolled)
+  }, [])
+  useEffect(() => {
+    if (!open) return
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = previousOverflow }
+  }, [open])
+  const toggleTheme = () => {
+    const next = !darkMode
+    document.documentElement.classList.toggle('dark', next)
+    try { window.localStorage.setItem('fire-safety-theme', next ? 'dark' : 'light') } catch { /* Theme still changes for this session. */ }
+    setDarkMode(next)
+  }
+  return <header className={`header${scrolled ? ' header-scrolled' : ''}${open ? ' header-menu-open' : ''}`}><div className="container header-inner"><Logo animateMark darkMode={darkMode} />
     <button type="button" className="menu-toggle" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-controls="primary-navigation" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button>
     <nav id="primary-navigation" className={open ? 'nav nav-open' : 'nav'} aria-label="Main navigation">
       {navLinks.map(item => {
         const Icon = navIcons[item.to as keyof typeof navIcons] || House
         return <NavLink key={item.to} to={item.to} end={item.to === '/'} onClick={() => setOpen(false)}><span className="nav-link-icon" aria-hidden="true"><Icon size={18} strokeWidth={1.8}/></span>{item.label}</NavLink>
       })}
+      <button type="button" className="theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${darkMode ? 'light' : 'dark'} theme`} title={`Switch to ${darkMode ? 'light' : 'dark'} theme`}><span aria-hidden="true">{darkMode ? <Moon size={19}/> : <Sun size={19}/>}</span><span className="theme-toggle-label">{darkMode ? 'Light appearance' : 'Dark appearance'}</span></button>
     </nav>
+    <button type="button" className="theme-toggle header-theme-toggle" onClick={toggleTheme} aria-label={`Switch to ${darkMode ? 'light' : 'dark'} theme`} title={`Switch to ${darkMode ? 'light' : 'dark'} theme`}><span aria-hidden="true">{darkMode ? <Moon size={19}/> : <Sun size={19}/>}</span></button>
     <Link className="button button-light header-cta" to="/contact#enquiry-form">Get a quote <ArrowUpRight size={15} /></Link>
   </div></header>
 }
@@ -84,7 +116,7 @@ function Footer() {
   </div><div className="container footer-bottom"><span>© {new Date().getFullYear()} {business.name}. All rights reserved.</span><div><Link to="/privacy">Privacy</Link><Link to="/terms">Terms</Link></div></div></footer>
 }
 
-function WhatsAppFloat() { return <a className="whatsapp-float" href={`https://wa.me/${business.whatsapp}?text=${encodeURIComponent('Hello, I would like to enquire about fire safety services.')}`} target="_blank" rel="noreferrer" aria-label="Chat with us on WhatsApp"><span className="wa-symbol" aria-hidden="true"><MessageCircle size={18}/></span><span>Chat on WhatsApp</span></a> }
+function WhatsAppFloat() { return <a className="whatsapp-float" href={`https://wa.me/${business.whatsapp}?text=${encodeURIComponent('Hello, I would like to enquire about fire safety services.')}`} target="_blank" rel="noreferrer" aria-label="Chat with us on WhatsApp"><img className="whatsapp-icon" src="/images/whatsapp.svg" alt=""/><span>Chat on WhatsApp</span></a> }
 
 function ServiceIcon({ service }: { service: Service }) {
   const Icon = service.icon === 'alarm' ? Flame : service.icon === 'maintenance' ? Check : service.icon === 'equipment' ? ShieldCheck : service.icon === 'pipeline' ? ArrowRight : Flame
@@ -98,13 +130,39 @@ function ServiceCard({ service, index = 0 }: { service: Service; index?: number 
       <span className="visual-label">Illustrative image</span>
     </div>
     <div className="service-card-content"><ServiceIcon service={service} /><h3>{service.title}</h3><p>{service.short}</p>
-      <div className="card-actions"><Link className="text-link" to={`/services/${service.slug}`}>Learn more <ArrowRight size={16} /></Link><Link className="quote-link" to={`/contact?service=${service.slug}#enquiry-form`}>Get a quote</Link></div>
+      <div className="card-actions"><Link className="text-link" to={`/services/${service.slug}`}>Learn more <ArrowRight size={16} /></Link></div>
     </div>
   </article>
 }
 
 function SectionHeading({ eyebrow, title, copy, align = 'left' }: { eyebrow: string; title: string; copy?: string; align?: 'left' | 'center' }) {
   return <div className={`section-heading align-${align}`}><span className="eyebrow"><i />{eyebrow}</span><h2>{title}</h2>{copy && <p>{copy}</p>}</div>
+}
+
+function AnimatedCount({ value }: { value: number }) {
+  const [count, setCount] = useState(value)
+  const countRef = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    const element = countRef.current
+    if (!element || window.matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return
+    let interval: number | undefined
+    const observer = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return
+      observer.disconnect()
+      let current = 1
+      setCount(current)
+      interval = window.setInterval(() => {
+        current = Math.min(value, current + 1)
+        setCount(current)
+        if (current >= value && interval) window.clearInterval(interval)
+      }, 80)
+    }, { threshold: 0.75 })
+    observer.observe(element)
+    return () => { observer.disconnect(); if (interval) window.clearInterval(interval) }
+  }, [value])
+
+  return <span className="customer-count" ref={countRef}><span className="customer-count-roll" key={count}>{count}</span>+</span>
 }
 
 function LocationsSection() {
@@ -118,6 +176,10 @@ function ProjectShowcaseCarousel() {
   const [active, setActive] = useState(projectPhotos.length - 1)
   const [transitionFrom, setTransitionFrom] = useState<number | null>(null)
   const [direction, setDirection] = useState<'next' | 'previous'>('next')
+  const [prefersReducedMotion] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const [paused, setPaused] = useState(prefersReducedMotion)
+  const [interacting, setInteracting] = useState(false)
+  const [pageVisible, setPageVisible] = useState(() => typeof document === 'undefined' || !document.hidden)
   const project = projectPhotos[active]
   const changeTo = (index: number, nextDirection: 'next' | 'previous') => {
     if (index === active) return
@@ -134,7 +196,23 @@ function ProjectShowcaseCarousel() {
     return () => window.clearTimeout(timer)
   }, [transitionFrom])
 
-  return <section className="project-preview-photo" aria-roledescription="carousel" aria-label="Completed fire safety installations">
+  useEffect(() => {
+    const updateVisibility = () => setPageVisible(!document.hidden)
+    document.addEventListener('visibilitychange', updateVisibility)
+    return () => document.removeEventListener('visibilitychange', updateVisibility)
+  }, [])
+
+  useEffect(() => {
+    if (paused || interacting || !pageVisible || prefersReducedMotion || projectPhotos.length < 2) return
+    const timer = window.setInterval(() => {
+      setDirection('next')
+      setTransitionFrom(active)
+      setActive((active + 1) % projectPhotos.length)
+    }, 5000)
+    return () => window.clearInterval(timer)
+  }, [active, interacting, pageVisible, paused, prefersReducedMotion])
+
+  return <section className="project-preview-photo" aria-roledescription="carousel" aria-label="Completed fire safety installations" onMouseEnter={() => setInteracting(true)} onMouseLeave={() => setInteracting(false)} onFocusCapture={() => setInteracting(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setInteracting(false) }}>
     <div className="project-card-stack" aria-hidden="true">
       <span className="project-stack-card project-stack-left"><img src={projectPhotos[(active + projectPhotos.length - 1) % projectPhotos.length].image} alt="" /></span>
       <span className="project-stack-card project-stack-right"><img src={projectPhotos[(active + 1) % projectPhotos.length].image} alt="" /></span>
@@ -146,30 +224,30 @@ function ProjectShowcaseCarousel() {
       <b>{project.title}</b>
     </Link>
     <span className="project-slide-count" aria-hidden="true">{String(active + 1).padStart(2, '0')} / {String(projectPhotos.length).padStart(2, '0')}</span>
+    <button className="project-slide-toggle" type="button" onClick={() => setPaused(value => !value)} aria-label={paused ? 'Resume automatic project slideshow' : 'Pause automatic project slideshow'} aria-pressed={paused} disabled={prefersReducedMotion} title={prefersReducedMotion ? 'Automatic slideshow disabled by reduced motion setting' : undefined}>{paused ? <Play size={16} fill="currentColor" /> : <Pause size={16} />}</button>
     <button className="project-slide-arrow project-slide-prev" type="button" aria-label="Previous project photo" onClick={previous}><ChevronLeft size={21} /></button>
     <button className="project-slide-arrow project-slide-next" type="button" aria-label="Next project photo" onClick={next}><ChevronRight size={21} /></button>
   </section>
 }
 
 function Home() {
-  return <>
+  return <div className="home-page">
     <section className="hero"><div className="hero-image" /><div className="hero-shade" /><div className="container hero-inner">
       <div className="hero-copy"><span className="eyebrow eyebrow-white"><i /> INSTALLATION &amp; MAINTENANCE</span><h1>Fire safety for your building.</h1><p>Sprinklers, fire pipelines, alarms and safety equipment, installed and maintained.</p>
         <div className="hero-actions"><Link className="button button-red" to="/contact#enquiry-form">Get a quote <ArrowUpRight size={17} /></Link><a className="button button-outline" href={`tel:${business.phone}`}><Phone size={16} /> Call us</a></div>
-        <ul className="hero-trust" aria-label="Service details"><li><b>{business.customersServed}</b><span>customers served</span></li><li><b>Careful work</b><span>Attention to products and installation</span></li><li><b>Serving</b><span>{business.serviceAreas.join(' · ')}</span></li></ul>
+        <ul className="hero-trust" aria-label="Service details"><li><b><AnimatedCount value={business.customersServed}/></b><span>customers served</span></li><li><b>Careful work</b><span>Attention to products and installation</span></li><li><b>Serving</b><span>{business.serviceAreas.join(' · ')}</span></li></ul>
       </div>
       <div className="hero-note"><span>FIRE SAFETY INSTALLATION</span><span>Illustrative image</span></div>
       <a className="scroll-cue" href="#services"><ArrowDown size={16} /> See our services</a>
     </div><div className="hero-side-mark" aria-hidden="true">S G / 01</div></section>
-    <section id="intro" className="intro section-pad"><div className="container intro-grid"><div><span className="eyebrow"><i /> ABOUT OUR WORK</span><h2>Fire safety starts with a conversation.</h2></div><div><p className="intro-copy">Tell us about your building. We’ll discuss the work and the next steps with you.</p><Link to="/about" className="text-link">About us <ArrowRight size={16} /></Link></div></div></section>
-    <section className="trust-strip"><div className="container trust-grid"><div className="trust-stat"><strong>{business.customersServed}</strong><span>Customers served</span></div><div className="trust-item"><ShieldCheck /><div><b>Careful work</b><span>Attention to products and installation</span></div></div><div className="trust-item"><Flame /><div><b>Clear service</b><span>Speak directly with our team</span></div></div></div></section>
-    <LocationsSection />
+    <section className="trust-strip"><div className="container trust-grid"><div className="trust-stat"><img src="/images/trust-customers.png" alt="" aria-hidden="true"/><strong><AnimatedCount value={business.customersServed}/></strong><span>Customers served</span></div><div className="trust-item"><img src="/images/trust-careful-work.png" alt="" aria-hidden="true"/><div><b>Careful work</b><span>Attention to products and installation</span></div></div><div className="trust-item"><img src="/images/trust-serving.png" alt="" aria-hidden="true"/><div><b>Serving</b><span>{business.serviceAreas.join(' · ')}</span></div></div></div></section>
     <section id="services" className="services-section section-pad"><div className="container"><div className="section-row"><SectionHeading eyebrow="OUR SERVICES" title="Fire safety services" copy="See how we can help. Contact us about your site."/><Link className="text-link section-more" to="/services">All services <ArrowRight size={16} /></Link></div><div className="service-grid">{services.map((s, i) => <ServiceCard key={s.slug} service={s} index={i} />)}</div></div></section>
-    <section className="approach-section"><div className="container approach-grid"><div className="approach-photo"><img src="/images/fire-maintenance.webp" alt="Illustrative technician inspecting fire sprinkler pipework in a commercial building" loading="lazy" /><span>ILLUSTRATIVE IMAGE</span></div><div className="approach-content"><span className="eyebrow"><i /> WHY SHREE GANGA</span><h2>Practical help from our team.</h2><p>We listen to your needs, explain the next steps and stay in touch.</p><ul className="check-list"><li><Check /> Quality products</li><li><Check /> Careful installation</li><li><Check /> Clear communication</li><li><Check /> Customer satisfaction</li></ul><Link className="button button-dark" to="/about">About us <ArrowRight size={16} /></Link></div></div></section>
-    <section className="leadership section-pad"><div className="container"><div className="section-row"><SectionHeading eyebrow="OUR TEAM" title="Meet our founders." copy="Speak with us about your project."/><Link className="text-link section-more" to="/about">About us <ArrowRight size={16} /></Link></div><div className="leader-grid"><div className="leader-card"><span className="leader-initial">RK</span><div><b>Ritik Kumar</b><small>Founder</small></div></div><div className="leader-card"><span className="leader-initial">AK</span><div><b>Ashish Kumar</b><small>Co-Founder</small></div></div><div className="leader-note"><p>We are growing through careful work and good customer service.</p></div></div></div></section>
     <section className="projects-preview"><div className="container projects-preview-inner"><div className="project-preview-copy"><span className="eyebrow eyebrow-white"><i /> OUR WORK</span><h2>Completed projects</h2><p>Photos from fire safety work completed by our team.</p><Link className="button button-light" to="/projects">See our projects <ArrowRight size={16} /></Link></div><ProjectShowcaseCarousel /></div></section>
+    <section className="approach-section"><div className="container approach-grid"><div className="approach-photo"><img src="/images/fire-maintenance.webp" alt="Illustrative technician inspecting fire sprinkler pipework in a commercial building" loading="lazy" /><span>ILLUSTRATIVE IMAGE</span></div><div className="approach-content"><span className="eyebrow"><i /> WHY SHREE GANGA</span><h2>Fire safety starts with a conversation.</h2><p>Tell us about your building. We’ll discuss the work and the next steps with you. We listen to your needs, explain the plan and stay in touch.</p><ul className="check-list"><li><Check /> Quality products</li><li><Check /> Careful installation</li><li><Check /> Clear communication</li><li><Check /> Customer satisfaction</li></ul><Link className="button button-dark" to="/about">About us <ArrowRight size={16} /></Link></div></div></section>
+    <LocationsSection />
+    <section className="leadership section-pad"><div className="container"><div className="section-row"><SectionHeading eyebrow="OUR TEAM" title="Meet our founders." copy="Speak with us about your project."/><Link className="text-link section-more" to="/about">About us <ArrowRight size={16} /></Link></div><div className="leader-grid"><div className="leader-card"><span className="leader-initial">RK</span><div><b>Ritik Kumar</b><small>Founder</small></div></div><div className="leader-card"><span className="leader-initial">AK</span><div><b>Ashish Kumar</b><small>Co-Founder</small></div></div><div className="leader-note"><p>We are growing through careful work and good customer service.</p></div></div></div></section>
     <section className="closing-cta"><div className="container closing-inner"><div><span className="eyebrow"><i /> CONTACT US</span><h2>Need fire safety work?</h2><p>Tell us about your project. We’ll get back to you.</p></div><Link className="button button-red" to="/contact#enquiry-form">Get a quote <ArrowUpRight size={17} /></Link></div></section>
-  </>
+  </div>
 }
 
 function PageIntro({ eyebrow, title, copy, className = '' }: { eyebrow: string; title: string; copy: string; className?: string }) {
@@ -177,10 +255,18 @@ function PageIntro({ eyebrow, title, copy, className = '' }: { eyebrow: string; 
 }
 
 function About() {
+  const [darkMode, setDarkMode] = useState(() => typeof document !== 'undefined' && document.documentElement.classList.contains('dark'))
+  useEffect(() => {
+    const root = document.documentElement
+    const syncTheme = () => setDarkMode(root.classList.contains('dark'))
+    const observer = new MutationObserver(syncTheme)
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
   return <><PageIntro eyebrow="ABOUT US" title="Fire safety, with care." copy="We install fire safety systems and equipment. We focus on good products, careful work and clear communication." />
-    <section className="about-content section-pad"><div className="container about-grid"><div className="about-lead"><span className="eyebrow"><i /> OUR COMPANY</span><h2>A growing fire safety team.</h2><p>We have served 12 customers. Their appreciation encourages us to keep improving.</p><p>We listen, discuss the work and agree on the next steps with you.</p></div><div className="about-image"><img src="/images/fire-sprinkler.webp" alt="Illustrative fire sprinkler equipment" /><span>ILLUSTRATIVE IMAGE</span></div></div></section>
+    <section className="about-content section-pad"><div className="container about-grid"><div className="about-lead"><span className="eyebrow"><i /> OUR COMPANY</span><h2>A growing fire safety team.</h2><p>We’ve served {business.customersServed}+ customers and continue to welcome new enquiries.</p><p>We listen, discuss the work and agree on the next steps with you.</p></div><div className="about-image"><img src="/images/fire-sprinkler.webp" alt="Illustrative fire sprinkler equipment" /><span>ILLUSTRATIVE IMAGE</span></div></div></section>
     <section className="values-section section-pad"><div className="container"><SectionHeading eyebrow="OUR VALUES" title="How we work."/><div className="mission-grid"><article><span>OUR MISSION</span><p>Help customers find fire safety products and installation services for their needs.</p></article><article><span>OUR VISION</span><p>Grow through good work, clear service and lasting customer relationships.</p></article></div><div className="value-grid"><article><span>01</span><h3>Good products</h3><p>We pay attention to the products we use.</p></article><article><span>02</span><h3>Careful work</h3><p>We aim to do each job with care.</p></article><article><span>03</span><h3>Clear plans</h3><p>We discuss your site and needs before work begins.</p></article></div></div></section>
-    <section className="leaders-section section-pad"><div className="container"><SectionHeading eyebrow="LEADERSHIP" title="Meet our founders." copy="Call us to talk about your project."/><div className="founders-grid"><div className="founder-card"><span>RK</span><div><small>FOUNDER</small><h3>Ritik Kumar</h3><a href={`tel:${business.phone}`}><Phone size={15}/> {business.phone}</a></div></div><div className="founder-card"><span>AK</span><div><small>CO-FOUNDER</small><h3>Ashish Kumar</h3><a href={`tel:${business.alternatePhone}`}><Phone size={15}/> {business.alternatePhone}</a></div></div></div></div></section>
+    <section className="leaders-section section-pad"><div className="container"><SectionHeading eyebrow="LEADERSHIP" title="Meet our founders." copy="Call us to talk about your project."/><Suspense fallback={<span className="founder-brand-reveal" aria-hidden="true"/>}><GlassIconReveal logo={SHREE_GANGA_MARK} label="Shree Ganga Fire & Safety shield and flame" background={darkMode ? '#292524' : '#faf7f5'} logoColor="#9b2c2c" tileSize={256} logoScale={0.82} finalScale={1} loop={false} className="founder-brand-reveal"/></Suspense><div className="founders-grid"><div className="founder-card"><span>RK</span><div><small>FOUNDER</small><h3>Ritik Kumar</h3><a href={`tel:${business.phone}`}><Phone size={15}/> {business.phone}</a></div></div><div className="founder-card"><span>AK</span><div><small>CO-FOUNDER</small><h3>Ashish Kumar</h3><a href={`tel:${business.alternatePhone}`}><Phone size={15}/> {business.alternatePhone}</a></div></div></div></div></section>
     <Callout />
   </>
 }
@@ -352,7 +438,7 @@ function EnquiryForm() {
 function Contact() {
   const { search } = useLocation()
   const params = new URLSearchParams(search)
-  return <><PageIntro eyebrow="CONTACT" title="Contact us." copy="Tell us about your project using the form below, or call us directly." className="contact-page-intro"/><section className="contact-section contact-page-section section-pad"><div className="container contact-grid"><div className="contact-info"><span className="eyebrow"><i/> GET IN TOUCH</span><h2>Choose how to reach us.</h2><p>Call, email or send us a message on WhatsApp.</p><div className="contact-person"><span>RK</span><div><b>Ritik Kumar</b><small>Founder</small><a href={`tel:${business.phone}`}>{business.phone}</a></div><a className="round-link" href={`tel:${business.phone}`} aria-label="Call Ritik Kumar"><Phone size={17}/></a></div><div className="contact-person"><span>AK</span><div><b>Ashish Kumar</b><small>Co-Founder</small><a href={`tel:${business.alternatePhone}`}>{business.alternatePhone}</a></div><a className="round-link" href={`tel:${business.alternatePhone}`} aria-label="Call Ashish Kumar"><Phone size={17}/></a></div><a className="contact-email" href={`mailto:${business.email}`}><span className="gmail-mark"><svg viewBox="0 0 48 48" role="img" aria-label="Gmail"><path fill="#4285F4" d="M5 13.5 11.5 18v22H8.8A3.8 3.8 0 0 1 5 36.2z"/><path fill="#34A853" d="M36.5 18 43 13.5v22.7a3.8 3.8 0 0 1-3.8 3.8h-2.7z"/><path fill="#FBBC04" d="M5 13.5 11.5 18v22H8.8A3.8 3.8 0 0 1 5 36.2z"/><path fill="#EA4335" d="M5.8 10.7a3.8 3.8 0 0 1 4.7-.2L24 20.8l13.5-10.3a3.8 3.8 0 0 1 4.7.2L24 29.2z"/><path fill="#C5221F" d="M36.5 18 43 13.5v22.7a3.8 3.8 0 0 1-3.8 3.8h-2.7z"/></svg></span><div><small>EMAIL</small><b>{business.email}</b></div></a><a className="contact-whatsapp" href={`https://wa.me/${business.whatsapp}?text=${encodeURIComponent(`Hello ${business.name}, I would like to discuss ${params.get('service') ? services.find(s=>s.slug===params.get('service'))?.title || 'another fire safety service' : 'a fire safety project'}.`)}`} target="_blank" rel="noreferrer">Message us on WhatsApp <ArrowUpRight size={16}/></a><div className="contact-areas"><span className="eyebrow"><i/> CURRENT SERVICE AREAS</span><p>{business.serviceAreas.join(' · ')}</p><small>Contact us about other locations.</small></div></div><div id="enquiry-form" className="contact-form-wrap" tabIndex={-1}><div className="form-heading"><span className="eyebrow"><i/> QUICK ENQUIRY</span><h2>Get a quote.</h2><p>Fields with * are required.</p></div><EnquiryForm/></div></div></section></>
+  return <><PageIntro eyebrow="CONTACT" title="Contact us." copy="Tell us about your project using the form below, or call us directly." className="contact-page-intro"/><section className="contact-section contact-page-section section-pad"><div className="container contact-grid"><div className="contact-info"><span className="eyebrow"><i/> GET IN TOUCH</span><h2>Choose how to reach us.</h2><p>Call, email or send us a message on WhatsApp.</p><div className="contact-person"><span>RK</span><div><b>Ritik Kumar</b><small>Founder</small><a href={`tel:${business.phone}`}>{business.phone}</a></div><a className="round-link" href={`tel:${business.phone}`} aria-label="Call Ritik Kumar"><Phone size={17}/></a></div><div className="contact-person"><span>AK</span><div><b>Ashish Kumar</b><small>Co-Founder</small><a href={`tel:${business.alternatePhone}`}>{business.alternatePhone}</a></div><a className="round-link" href={`tel:${business.alternatePhone}`} aria-label="Call Ashish Kumar"><Phone size={17}/></a></div><a className="contact-email" href={`mailto:${business.email}`}><span className="gmail-mark"><svg viewBox="0 0 48 48" role="img" aria-label="Gmail"><path fill="#4285F4" d="M5 13.5 11.5 18v22H8.8A3.8 3.8 0 0 1 5 36.2z"/><path fill="#34A853" d="M36.5 18 43 13.5v22.7a3.8 3.8 0 0 1-3.8 3.8h-2.7z"/><path fill="#FBBC04" d="M5 13.5 11.5 18v22H8.8A3.8 3.8 0 0 1 5 36.2z"/><path fill="#EA4335" d="M5.8 10.7a3.8 3.8 0 0 1 4.7-.2L24 20.8l13.5-10.3a3.8 3.8 0 0 1 4.7.2L24 29.2z"/><path fill="#C5221F" d="M36.5 18 43 13.5v22.7a3.8 3.8 0 0 1-3.8 3.8h-2.7z"/></svg></span><div><small>EMAIL</small><b>{business.email}</b></div></a><a className="contact-whatsapp" href={`https://wa.me/${business.whatsapp}?text=${encodeURIComponent(`Hello ${business.name}, I would like to discuss ${params.get('service') ? services.find(s=>s.slug===params.get('service'))?.title || 'another fire safety service' : 'a fire safety project'}.`)}`} target="_blank" rel="noreferrer"><img className="whatsapp-icon" src="/images/whatsapp.svg" alt=""/> Message us on WhatsApp <ArrowUpRight size={16}/></a><div className="contact-areas"><span className="eyebrow"><i/> CURRENT SERVICE AREAS</span><p>{business.serviceAreas.join(' · ')}</p><small>Contact us about other locations.</small></div></div><div id="enquiry-form" className="contact-form-wrap" tabIndex={-1}><div className="form-heading"><span className="eyebrow"><i/> QUICK ENQUIRY</span><h2>Get a quote.</h2><p>Fields with * are required.</p></div><EnquiryForm/></div></div></section></>
 }
 
 function Legal({ type }: { type: 'privacy' | 'terms' }) {
@@ -374,5 +460,5 @@ export default function App() {
       })
     } else window.scrollTo(0, 0)
   }, [location.pathname, location.hash])
-  return <><Metadata/><Header/><main key={`${location.pathname}${location.search}`} className="page-transition"><Routes><Route path="/" element={<Home/>}/><Route path="/about" element={<About/>}/><Route path="/services" element={<Services/>}/><Route path="/services/:slug" element={<ServiceDetail/>}/><Route path="/projects" element={<Projects/>}/><Route path="/reviews" element={<Testimonials/>}/><Route path="/testimonials" element={<Navigate to="/reviews" replace/>}/><Route path="/contact" element={<Contact/>}/><Route path="/privacy" element={<Legal type="privacy"/>}/><Route path="/terms" element={<Legal type="terms"/>}/><Route path="*" element={<NotFound/>}/></Routes></main><Footer/><WhatsAppFloat/><div className="mobile-contact"><a href={`tel:${business.phone}`}><Phone size={16}/> Call</a><a href={`https://wa.me/${business.whatsapp}?text=${encodeURIComponent('Hello, I would like to ask about fire safety work.')}`} target="_blank" rel="noreferrer"><MessageCircle size={16}/> WhatsApp</a><Link to="/contact#enquiry-form">Get a quote <ArrowUpRight size={15}/></Link></div><button type="button" className="back-top" onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} aria-label="Scroll to top"><ChevronDown size={16}/></button></>
+  return <><Metadata/><Header/><main key={`${location.pathname}${location.search}`} className="page-transition"><Routes><Route path="/" element={<Home/>}/><Route path="/about" element={<About/>}/><Route path="/services" element={<Services/>}/><Route path="/services/:slug" element={<ServiceDetail/>}/><Route path="/projects" element={<Projects/>}/><Route path="/reviews" element={<Testimonials/>}/><Route path="/testimonials" element={<Navigate to="/reviews" replace/>}/><Route path="/contact" element={<Contact/>}/><Route path="/privacy" element={<Legal type="privacy"/>}/><Route path="/terms" element={<Legal type="terms"/>}/><Route path="*" element={<NotFound/>}/></Routes></main><Footer/><WhatsAppFloat/><div className="mobile-contact"><a href={`tel:${business.phone}`}><Phone size={16}/> Call</a><a href={`https://wa.me/${business.whatsapp}?text=${encodeURIComponent('Hello, I would like to ask about fire safety work.')}`} target="_blank" rel="noreferrer"><img className="whatsapp-icon" src="/images/whatsapp.svg" alt=""/> WhatsApp</a><Link to="/contact#enquiry-form">Get a quote <ArrowUpRight size={15}/></Link></div><button type="button" className="back-top" onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} aria-label="Scroll to top"><ChevronDown size={16}/></button></>
 }

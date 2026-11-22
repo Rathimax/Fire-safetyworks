@@ -5,7 +5,7 @@ export const business = {
   coFounder: 'Ashish Kumar',
   phone: '8218442193',
   alternatePhone: '7310606033',
-  email: 'ritiknain748@gmail.com',
+  email: 'shreegangafiresafety@gmail.com',
   whatsapp: '918218442193',
   customersServed: 12,
   serviceAreas: ['Lucknow', 'Saharanpur', 'Dehradun', 'Uttarakhand', 'Delhi'],

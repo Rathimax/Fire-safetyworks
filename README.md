@@ -27,6 +27,8 @@ Update company configuration in `src/data/business.ts`. The primary WhatsApp num
 
 Images under `public/images/` are generated illustrative industry imagery for service presentation and are labeled as illustrative. The seven optimized photographs under `public/images/projects/` were supplied by the business as completed project work; image paths, captions and alt text are centralized in `src/data/business.ts`. Captions describe visible installations only and omit unprovided client names, dates and exact locations. The reviews page shows nine customer-provided ratings with the names, venues and locations supplied by the business. Each card has one distinct feedback point paraphrased from themes supplied by the business; these are summaries, not direct customer quotes. Confirm approval to publish customer names and venue names before launch. There are no published claims of certification, government approval, business address, business hours or years of experience. Confirmed service areas are maintained in `src/data/business.ts`.
 
+The About page uses a one-time Glass Reveal logo animation adapted from the supplied component. Its shader and motion timeline credit [zanwei/glass-icon-reveal](https://github.com/zanwei/glass-icon-reveal); the upstream MIT notice is preserved in `third-party-licenses/glass-icon-reveal-MIT.txt`.
+
 ## Security checklist
 
 - HTTPS and a production domain: configure and verify after purchase.
