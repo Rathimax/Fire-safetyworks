@@ -38,4 +38,4 @@ Reviews URL update: the public route and sitemap use `/reviews`; `/testimonials`
 - No deployed-host checks were possible: the business has no domain configured and the website has not been deployed. HTTPS, response headers and custom-domain DNS must be verified after deployment.
 - No server-side form submission exists. The form hands details to WhatsApp only after visitor action; browser validation and a honeypot do not provide server-side abuse controls.
 - No automated interaction test suite, Lighthouse run, external penetration test or assistive-technology audit is included.
-- No real message was sent to WhatsApp. The site now uses WhatsApp's numberless share link, which lets the visitor choose a recipient.
+- No real message was sent to WhatsApp; the configured number and WhatsApp registration must be confirmed by the business.

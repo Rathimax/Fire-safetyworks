@@ -23,7 +23,7 @@ const pageDescriptions: Record<string, string> = {
   '/services': `Explore fire sprinkler, firefighting pipeline, extinguisher, alarm and maintenance services from ${business.name}.`,
   '/projects': `View photos of firefighting pipeline, hose reel, pump and fire safety equipment installations completed by ${business.name}.`,
   '/reviews': `Read customer ratings for fire safety installation work by ${business.name}.`,
-  '/contact': `Contact ${business.name} by email or WhatsApp about fire safety installation and equipment.`,
+  '/contact': `Contact ${business.name} by phone, email or WhatsApp about fire safety installation and equipment.`,
   '/privacy': `Learn how ${business.name} handles information entered in its website enquiry form.`,
   '/terms': `Read the terms for using the ${business.name} website and information about its services.`,
 }
@@ -42,11 +42,12 @@ export function getStructuredData(pathname: string) {
   return service ? {
     '@context': 'https://schema.org', '@type': 'Service', name: service.title,
     description, serviceType: service.title, areaServed: business.serviceAreas,
-    provider: { '@type': 'Organization', name: business.name, email: business.email, ...(business.siteUrl ? { url: business.siteUrl } : {}) },
+    provider: { '@type': 'Organization', name: business.name, telephone: business.phone, email: business.email, ...(business.siteUrl ? { url: business.siteUrl } : {}) },
   } : {
     '@context': 'https://schema.org', '@type': 'Organization', name: business.name,
     description: business.description, email: business.email,
-    areaServed: business.serviceAreas,
+    areaServed: business.serviceAreas, telephone: business.phone,
+    contactPoint: [{ '@type': 'ContactPoint', telephone: business.phone, contactType: 'customer service' }],
     ...(business.siteUrl ? { url: business.siteUrl } : {}),
   }
 }

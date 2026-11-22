@@ -19,9 +19,9 @@ For a custom domain in Vercel: add the purchased domain in Project Settings → 
 
 ## Contact enquiry flow
 
-The contact form validates the required fields in the browser, includes a hidden honeypot, and opens WhatsApp with a prefilled message so visitors choose the recipient before sending. No business phone number is included in the site source or WhatsApp link. The service menu includes the five listed services and an “Others...” option; visitors can describe an unlisted request in the requirements field. The form does not store submissions and does not claim an enquiry was sent until the visitor continues in WhatsApp. This initial release has no backend rate limiter; the public website collects no server-side form submissions. If server-side lead capture is added later, use a managed form provider or a backend with server validation, rate limiting, spam controls, retention rules and protected storage before enabling it.
+The contact form validates the required fields in the browser, includes a hidden honeypot, and prepares a WhatsApp message to the configured primary phone number. The service menu includes the five listed services and an “Others...” option; visitors can describe an unlisted request in the requirements field. The form does not store submissions and does not claim an enquiry was sent until the visitor continues in WhatsApp. This initial release has no backend rate limiter; the public website collects no server-side form submissions. If server-side lead capture is added later, use a managed form provider or a backend with server validation, rate limiting, spam controls, retention rules and protected storage before enabling it.
 
-Update public company configuration in `src/data/business.ts`. All confirmed services are centralized in the same file.
+Update company configuration in `src/data/business.ts`. The primary WhatsApp number is configured as `918218442193` (`+91` plus the supplied 10-digit number); confirm the country code and WhatsApp registration before publishing. All confirmed services are centralized in the same file.
 
 ## Design assets and content integrity
 
@@ -40,10 +40,11 @@ Images under `public/images/` are generated illustrative industry imagery for se
 
 ## Test and verification report
 
-Run `npm run lint`, `npm run typecheck` and `npm run build` before deployment. Confirm the five detail routes, navigation, responsive menu, email links and WhatsApp share handoff in a browser. This repository does not currently include an automated interaction test suite or server-side form API. See [TESTING.md](./TESTING.md) for the latest executed checks and remaining verification.
+Run `npm run lint`, `npm run typecheck` and `npm run build` before deployment. Confirm the five detail routes, navigation, responsive menu, telephone/email links and WhatsApp handoff in a browser. This repository does not currently include an automated interaction test suite or server-side form API. See [TESTING.md](./TESTING.md) for the latest executed checks and remaining verification.
 
 ## Still needed from the business
 
+- Confirm the `+91` country code and WhatsApp registration for primary number 8218442193.
 - Confirm whether any additional service locations should be listed. Current locations supplied by the business are Lucknow, Saharanpur, Dehradun, Uttarakhand and Delhi.
 - Purchase and provide the production domain.
 - Confirm any client naming, project dates, exact locations or additional project details before adding them to the gallery.
