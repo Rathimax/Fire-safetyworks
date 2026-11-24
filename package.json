@@ -9,9 +9,10 @@
     "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir .seo-ssr && node scripts/prerender-seo.mjs",
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty",
-    "lint": "biome lint src/main.tsx src/site/App.tsx src/data/business.ts src/data/seo.ts src/entry-server.tsx src/vite-env.d.ts scripts/generate-seo.mjs scripts/prerender-seo.mjs vite.config.ts"
+    "lint": "biome lint src/main.tsx src/site/App.tsx src/site/Admin.tsx src/data/business.ts src/data/site-content.tsx src/data/seo.ts src/entry-server.tsx src/vite-env.d.ts scripts/generate-seo.mjs scripts/prerender-seo.mjs vite.config.ts"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.119.2",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

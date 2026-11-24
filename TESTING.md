@@ -1,5 +1,7 @@
 # Testing and verification report
 
+Admin console foundation, November 23, 2026: added a CEO-only `/admin` console, Supabase schema and RLS/storage policies for the customer count, reviews and project photos. `npm run typecheck` passed and `npm run build` passed. Supabase project setup, CEO account sign-in, uploads, deployed CSP and live database behavior are not verified because no Supabase project credentials have been configured.
+
 Verification run on November 10, 2026, against the local project.
 
 Project gallery update: seven supplied completed-work photographs were converted to WebP and added to the Projects page and homepage preview. Captions and alt text were checked against visible photo content; no client, date or project location details were added.

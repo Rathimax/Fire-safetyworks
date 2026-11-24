@@ -23,7 +23,9 @@ import Sun from 'lucide-react/dist/esm/icons/sun.js'
 import Moon from 'lucide-react/dist/esm/icons/moon.js'
 import X from 'lucide-react/dist/esm/icons/x.js'
 import Wrench from 'lucide-react/dist/esm/icons/wrench.js'
-import { business, customerRatings, navLinks, projectPhotos, services, type Service } from '../data/business'
+import { business, navLinks, services, type ProjectPhoto, type Service } from '../data/business'
+import { useSiteContent } from '../data/site-content'
+const Admin = lazy(() => import('./Admin'))
 import { getSeoMetadata, getStructuredData } from '../data/seo'
 const ratingStarKeys = ['star-1', 'star-2', 'star-3', 'star-4', 'star-5'] as const
 const serviceOptions = [...services.map(service => ({ value: service.slug, label: service.title })), { value: 'other', label: 'Others...' }]
@@ -34,6 +36,11 @@ const SHREE_GANGA_MARK = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4
 function Metadata() {
   const { pathname } = useLocation()
   useEffect(() => {
+    let robots = document.querySelector('meta[name="robots"]')
+    if (pathname === '/admin') {
+      if (!robots) { robots = document.createElement('meta'); robots.setAttribute('name', 'robots'); document.head.append(robots) }
+      robots.setAttribute('content', 'noindex, nofollow')
+    } else robots?.remove()
     const { title, description } = getSeoMetadata(pathname)
     document.title = title
     let meta = document.querySelector('meta[name="description"]')
@@ -172,8 +179,8 @@ function LocationsSection() {
   </div></section>
 }
 
-function ProjectShowcaseCarousel() {
-  const [active, setActive] = useState(projectPhotos.length - 1)
+function ProjectShowcaseCarousel({ projectPhotos }: { projectPhotos: ProjectPhoto[] }) {
+  const [active, setActive] = useState(Math.max(0, projectPhotos.length - 1))
   const [transitionFrom, setTransitionFrom] = useState<number | null>(null)
   const [direction, setDirection] = useState<'next' | 'previous'>('next')
   const [prefersReducedMotion] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
@@ -181,6 +188,7 @@ function ProjectShowcaseCarousel() {
   const [interacting, setInteracting] = useState(false)
   const [pageVisible, setPageVisible] = useState(() => typeof document === 'undefined' || !document.hidden)
   const project = projectPhotos[active]
+  useEffect(() => { setActive(index => Math.min(index, Math.max(0, projectPhotos.length - 1))) }, [projectPhotos.length])
   const changeTo = (index: number, nextDirection: 'next' | 'previous') => {
     if (index === active) return
     setDirection(nextDirection)
@@ -210,8 +218,9 @@ function ProjectShowcaseCarousel() {
       setActive((active + 1) % projectPhotos.length)
     }, 5000)
     return () => window.clearInterval(timer)
-  }, [active, interacting, pageVisible, paused, prefersReducedMotion])
+  }, [active, interacting, pageVisible, paused, prefersReducedMotion, projectPhotos.length])
 
+  if (!project) return <div className="empty-project"><b>No published project photos yet.</b><small>New completed work will appear here.</small></div>
   return <section className="project-preview-photo" aria-roledescription="carousel" aria-label="Completed fire safety installations" onMouseEnter={() => setInteracting(true)} onMouseLeave={() => setInteracting(false)} onFocusCapture={() => setInteracting(true)} onBlurCapture={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setInteracting(false) }}>
     <div className="project-card-stack" aria-hidden="true">
       <span className="project-stack-card project-stack-left"><img src={projectPhotos[(active + projectPhotos.length - 1) % projectPhotos.length].image} alt="" /></span>
@@ -231,18 +240,19 @@ function ProjectShowcaseCarousel() {
 }
 
 function Home() {
+  const { customersServed, projects } = useSiteContent()
   return <div className="home-page">
     <section className="hero"><div className="hero-image" /><div className="hero-shade" /><div className="container hero-inner">
       <div className="hero-copy"><span className="eyebrow eyebrow-white"><i /> INSTALLATION &amp; MAINTENANCE</span><h1>Fire safety for your building.</h1><p>Sprinklers, fire pipelines, alarms and safety equipment, installed and maintained.</p>
         <div className="hero-actions"><Link className="button button-red" to="/contact#enquiry-form">Get a quote <ArrowUpRight size={17} /></Link><a className="button button-outline" href={`tel:${business.phone}`}><Phone size={16} /> Call us</a></div>
-        <ul className="hero-trust" aria-label="Service details"><li><b><AnimatedCount value={business.customersServed}/></b><span>customers served</span></li><li><b>Careful work</b><span>Attention to products and installation</span></li><li><b>Serving</b><span>{business.serviceAreas.join(' · ')}</span></li></ul>
+        <ul className="hero-trust" aria-label="Service details"><li><b><AnimatedCount value={customersServed}/></b><span>customers served</span></li><li><b>Careful work</b><span>Attention to products and installation</span></li><li><b>Serving</b><span>{business.serviceAreas.join(' · ')}</span></li></ul>
       </div>
       <div className="hero-note"><span>FIRE SAFETY INSTALLATION</span><span>Illustrative image</span></div>
       <a className="scroll-cue" href="#services"><ArrowDown size={16} /> See our services</a>
     </div><div className="hero-side-mark" aria-hidden="true">S G / 01</div></section>
-    <section className="trust-strip"><div className="container trust-grid"><div className="trust-stat"><img src="/images/trust-customers.png" alt="" aria-hidden="true"/><strong><AnimatedCount value={business.customersServed}/></strong><span>Customers served</span></div><div className="trust-item"><img src="/images/trust-careful-work.png" alt="" aria-hidden="true"/><div><b>Careful work</b><span>Attention to products and installation</span></div></div><div className="trust-item"><img src="/images/trust-serving.png" alt="" aria-hidden="true"/><div><b>Serving</b><span>{business.serviceAreas.join(' · ')}</span></div></div></div></section>
+    <section className="trust-strip"><div className="container trust-grid"><div className="trust-stat"><img src="/images/trust-customers.png" alt="" aria-hidden="true"/><strong><AnimatedCount value={customersServed}/></strong><span>Customers served</span></div><div className="trust-item"><img src="/images/trust-careful-work.png" alt="" aria-hidden="true"/><div><b>Careful work</b><span>Attention to products and installation</span></div></div><div className="trust-item"><img src="/images/trust-serving.png" alt="" aria-hidden="true"/><div><b>Serving</b><span>{business.serviceAreas.join(' · ')}</span></div></div></div></section>
     <section id="services" className="services-section section-pad"><div className="container"><div className="section-row"><SectionHeading eyebrow="OUR SERVICES" title="Fire safety services" copy="See how we can help. Contact us about your site."/><Link className="text-link section-more" to="/services">All services <ArrowRight size={16} /></Link></div><div className="service-grid">{services.map((s, i) => <ServiceCard key={s.slug} service={s} index={i} />)}</div></div></section>
-    <section className="projects-preview"><div className="container projects-preview-inner"><div className="project-preview-copy"><span className="eyebrow eyebrow-white"><i /> OUR WORK</span><h2>Completed projects</h2><p>Photos from fire safety work completed by our team.</p><Link className="button button-light" to="/projects">See our projects <ArrowRight size={16} /></Link></div><ProjectShowcaseCarousel /></div></section>
+    <section className="projects-preview"><div className="container projects-preview-inner"><div className="project-preview-copy"><span className="eyebrow eyebrow-white"><i /> OUR WORK</span><h2>Completed projects</h2><p>Photos from fire safety work completed by our team.</p><Link className="button button-light" to="/projects">See our projects <ArrowRight size={16} /></Link></div><ProjectShowcaseCarousel projectPhotos={projects} /></div></section>
     <section className="approach-section"><div className="container approach-grid"><div className="approach-photo"><img src="/images/fire-maintenance.webp" alt="Illustrative technician inspecting fire sprinkler pipework in a commercial building" loading="lazy" /><span>ILLUSTRATIVE IMAGE</span></div><div className="approach-content"><span className="eyebrow"><i /> WHY SHREE GANGA</span><h2>Fire safety starts with a conversation.</h2><p>Tell us about your building. We’ll discuss the work and the next steps with you. We listen to your needs, explain the plan and stay in touch.</p><ul className="check-list"><li><Check /> Quality products</li><li><Check /> Careful installation</li><li><Check /> Clear communication</li><li><Check /> Customer satisfaction</li></ul><Link className="button button-dark" to="/about">About us <ArrowRight size={16} /></Link></div></div></section>
     <LocationsSection />
     <section className="leadership section-pad"><div className="container"><div className="section-row"><SectionHeading eyebrow="OUR TEAM" title="Meet our founders." copy="Speak with us about your project."/><Link className="text-link section-more" to="/about">About us <ArrowRight size={16} /></Link></div><div className="leader-grid"><div className="leader-card"><span className="leader-initial">RK</span><div><b>Ritik Kumar</b><small>Founder</small></div></div><div className="leader-card"><span className="leader-initial">AK</span><div><b>Ashish Kumar</b><small>Co-Founder</small></div></div><div className="leader-note"><p>We are growing through careful work and good customer service.</p></div></div></div></section>
@@ -255,6 +265,7 @@ function PageIntro({ eyebrow, title, copy, className = '' }: { eyebrow: string; 
 }
 
 function About() {
+  const { customersServed } = useSiteContent()
   const [darkMode, setDarkMode] = useState(() => typeof document !== 'undefined' && document.documentElement.classList.contains('dark'))
   useEffect(() => {
     const root = document.documentElement
@@ -264,7 +275,7 @@ function About() {
     return () => observer.disconnect()
   }, [])
   return <><PageIntro eyebrow="ABOUT US" title="Fire safety, with care." copy="We install fire safety systems and equipment. We focus on good products, careful work and clear communication." />
-    <section className="about-content section-pad"><div className="container about-grid"><div className="about-lead"><span className="eyebrow"><i /> OUR COMPANY</span><h2>A growing fire safety team.</h2><p>We’ve served {business.customersServed}+ customers and continue to welcome new enquiries.</p><p>We listen, discuss the work and agree on the next steps with you.</p></div><div className="about-image"><img src="/images/fire-sprinkler.webp" alt="Illustrative fire sprinkler equipment" /><span>ILLUSTRATIVE IMAGE</span></div></div></section>
+    <section className="about-content section-pad"><div className="container about-grid"><div className="about-lead"><span className="eyebrow"><i /> OUR COMPANY</span><h2>A growing fire safety team.</h2><p>We’ve served {customersServed}+ customers and continue to welcome new enquiries.</p><p>We listen, discuss the work and agree on the next steps with you.</p></div><div className="about-image"><img src="/images/fire-sprinkler.webp" alt="Illustrative fire sprinkler equipment" /><span>ILLUSTRATIVE IMAGE</span></div></div></section>
     <section className="values-section section-pad"><div className="container"><SectionHeading eyebrow="OUR VALUES" title="How we work."/><div className="mission-grid"><article><span>OUR MISSION</span><p>Help customers find fire safety products and installation services for their needs.</p></article><article><span>OUR VISION</span><p>Grow through good work, clear service and lasting customer relationships.</p></article></div><div className="value-grid"><article><span>01</span><h3>Good products</h3><p>We pay attention to the products we use.</p></article><article><span>02</span><h3>Careful work</h3><p>We aim to do each job with care.</p></article><article><span>03</span><h3>Clear plans</h3><p>We discuss your site and needs before work begins.</p></article></div></div></section>
     <section className="leaders-section section-pad"><div className="container"><SectionHeading eyebrow="LEADERSHIP" title="Meet our founders." copy="Call us to talk about your project."/><Suspense fallback={<span className="founder-brand-reveal" aria-hidden="true"/>}><GlassIconReveal logo={SHREE_GANGA_MARK} label="Shree Ganga Fire & Safety shield and flame" background={darkMode ? '#292524' : '#faf7f5'} logoColor="#9b2c2c" tileSize={256} logoScale={0.82} finalScale={1} loop={false} className="founder-brand-reveal"/></Suspense><div className="founders-grid"><div className="founder-card"><span>RK</span><div><small>FOUNDER</small><h3>Ritik Kumar</h3><a href={`tel:${business.phone}`}><Phone size={15}/> {business.phone}</a></div></div><div className="founder-card"><span>AK</span><div><small>CO-FOUNDER</small><h3>Ashish Kumar</h3><a href={`tel:${business.alternatePhone}`}><Phone size={15}/> {business.alternatePhone}</a></div></div></div></div></section>
     <Callout />
@@ -279,10 +290,11 @@ function ServiceDetail() {
   return <><PageIntro eyebrow="SERVICE" title={service.title} copy={service.description}/><section className="service-detail section-pad"><div className="container detail-grid"><div className="detail-image"><img src={service.image} alt={service.imageAlt} /><span>ILLUSTRATIVE IMAGE</span></div><div><span className="eyebrow"><i /> HOW IT WORKS</span><h2>Let’s discuss your site.</h2><p>We’ll discuss your building and the scope of work with you.</p><h3>Common uses</h3><ul className="check-list">{service.applications.map(x=><li key={x}><Check/>{x}</li>)}</ul><p className="detail-note">Ask us to confirm service availability for your location.</p><Link className="button button-red" to={`/contact?service=${service.slug}#enquiry-form`}>Get a quote <ArrowUpRight size={16}/></Link></div></div></section><section className="related-services section-pad"><div className="container"><SectionHeading eyebrow="MORE SERVICES" title="Other services"/><div className="service-grid">{services.filter(s=>s.slug!==service.slug).slice(0,3).map((s,i)=><ServiceCard key={s.slug} service={s} index={i+1}/>)}</div></div></section></>
 }
 
-function Projects() { return <><PageIntro eyebrow="PROJECTS" title="Completed projects." copy="Photos of fire hose reels, pipelines, pumps and other fire safety work." className="projects-page-intro"/><section className="project-gallery-section section-pad"><div className="container"><div className="project-gallery-intro"><span className="eyebrow"><i/> OUR WORK</span><p>Want similar work at your site? Contact us to discuss your project.</p></div><div className="project-gallery">{projectPhotos.map((project, index) => <figure className="project-photo-card" key={project.image}><div className="project-photo-frame"><img src={project.image} alt={project.alt} loading={index < 2 ? 'eager' : 'lazy'} decoding="async"/><span>{project.category}</span></div><figcaption><small>INSTALLATION {String(index + 1).padStart(2, '0')}</small><h2>{project.title}</h2></figcaption></figure>)}</div></div></section><Callout/></> }
+function Projects() { const { projects } = useSiteContent(); return <><PageIntro eyebrow="PROJECTS" title="Completed projects." copy="Photos of fire hose reels, pipelines, pumps and other fire safety work." className="projects-page-intro"/><section className="project-gallery-section section-pad"><div className="container"><div className="project-gallery-intro"><span className="eyebrow"><i/> OUR WORK</span><p>Want similar work at your site? Contact us to discuss your project.</p></div>{projects.length ? <div className="project-gallery">{projects.map((project, index) => <figure className="project-photo-card" key={`${project.image}-${project.title}`}><div className="project-photo-frame"><img src={project.image} alt={project.alt} loading={index < 2 ? 'eager' : 'lazy'} decoding="async"/><span>{project.category}</span></div><figcaption><small>INSTALLATION {String(index + 1).padStart(2, '0')}</small><h2>{project.title}</h2></figcaption></figure>)}</div> : <div className="empty-project"><b>No published project photos yet.</b><small>New completed work will appear here.</small></div>}</div></section><Callout/></> }
 
 function Testimonials() {
-  return <><PageIntro eyebrow="CUSTOMER RATINGS" title="Ratings from our customers." copy="These customers rated our work at their sites." className="reviews-page-intro"/><section className="review-section section-pad"><div className="container"><div className="review-summary"><p>Customer ratings</p><span>{customerRatings.length} ratings</span></div><div className="review-grid">{customerRatings.map(review => {
+  const { reviews } = useSiteContent()
+  return <><PageIntro eyebrow="CUSTOMER RATINGS" title="Ratings from our customers." copy="These customers rated our work at their sites." className="reviews-page-intro"/><section className="review-section section-pad"><div className="container"><div className="review-summary"><p>Customer ratings</p><span>{reviews.length} ratings</span></div>{reviews.length ? <div className="review-grid">{reviews.map(review => {
     const fullStars = Math.floor(review.rating)
     const halfStar = review.rating % 1 >= 0.5
     return <article className="review-card" key={`${review.venue}-${review.customer}`}>
@@ -299,7 +311,7 @@ function Testimonials() {
       <div className="review-card-feedback"><small>FEEDBACK POINT</small><p>{review.feedback.before}<strong>{review.feedback.highlight}</strong>{review.feedback.after}</p></div>
       <div className="review-customer"><small>RATED BY</small><b>{review.customer}</b></div>
     </article>
-  })}</div></div></section><Callout/></>
+  })}</div> : <div className="empty-project"><b>No published reviews yet.</b></div>}</div></section><Callout/></>
 }
 
 function ServiceDropdown({ value, onChange, invalid, triggerRef }: { value: string; onChange: (value: string) => void; invalid: boolean; triggerRef: RefObject<HTMLDivElement> }) {
@@ -450,6 +462,7 @@ function NotFound() { return <PageIntro eyebrow="PAGE NOT FOUND" title="Page not
 
 export default function App() {
   const location = useLocation()
+  const isAdmin = location.pathname.startsWith('/admin')
   // biome-ignore lint/correctness/useExhaustiveDependencies: scroll to the top after route navigation.
   useEffect(() => {
     if (location.hash) {
@@ -460,5 +473,5 @@ export default function App() {
       })
     } else window.scrollTo(0, 0)
   }, [location.pathname, location.hash])
-  return <><Metadata/><Header/><main key={`${location.pathname}${location.search}`} className="page-transition"><Routes><Route path="/" element={<Home/>}/><Route path="/about" element={<About/>}/><Route path="/services" element={<Services/>}/><Route path="/services/:slug" element={<ServiceDetail/>}/><Route path="/projects" element={<Projects/>}/><Route path="/reviews" element={<Testimonials/>}/><Route path="/testimonials" element={<Navigate to="/reviews" replace/>}/><Route path="/contact" element={<Contact/>}/><Route path="/privacy" element={<Legal type="privacy"/>}/><Route path="/terms" element={<Legal type="terms"/>}/><Route path="*" element={<NotFound/>}/></Routes></main><Footer/><WhatsAppFloat/><div className="mobile-contact"><a href={`tel:${business.phone}`}><Phone size={16}/> Call</a><a href={`https://wa.me/${business.whatsapp}?text=${encodeURIComponent('Hello, I would like to ask about fire safety work.')}`} target="_blank" rel="noreferrer"><img className="whatsapp-icon" src="/images/whatsapp.svg" alt=""/> WhatsApp</a><Link to="/contact#enquiry-form">Get a quote <ArrowUpRight size={15}/></Link></div><button type="button" className="back-top" onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} aria-label="Scroll to top"><ChevronDown size={16}/></button></>
+  return <><Metadata/>{!isAdmin && <Header/>}<main key={`${location.pathname}${location.search}`} className="page-transition"><Routes><Route path="/" element={<Home/>}/><Route path="/about" element={<About/>}/><Route path="/services" element={<Services/>}/><Route path="/services/:slug" element={<ServiceDetail/>}/><Route path="/projects" element={<Projects/>}/><Route path="/reviews" element={<Testimonials/>}/><Route path="/testimonials" element={<Navigate to="/reviews" replace/>}/><Route path="/contact" element={<Contact/>}/><Route path="/privacy" element={<Legal type="privacy"/>}/><Route path="/terms" element={<Legal type="terms"/>}/><Route path="/admin" element={<Suspense fallback={<div className="admin-shell" aria-busy="true"/>}><Admin/></Suspense>}/><Route path="*" element={<NotFound/>}/></Routes></main>{!isAdmin && <><Footer/><WhatsAppFloat/><div className="mobile-contact"><a href={`tel:${business.phone}`}><Phone size={16}/> Call</a><a href={`https://wa.me/${business.whatsapp}?text=${encodeURIComponent('Hello, I would like to ask about fire safety work.')}`} target="_blank" rel="noreferrer"><img className="whatsapp-icon" src="/images/whatsapp.svg" alt=""/> WhatsApp</a><Link to="/contact#enquiry-form">Get a quote <ArrowUpRight size={15}/></Link></div><button type="button" className="back-top" onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} aria-label="Scroll to top"><ChevronDown size={16}/></button></>}</>
 }

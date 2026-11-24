@@ -15,6 +15,7 @@ const pageTitles: Record<string, string> = {
   '/contact': 'Contact Our Fire Safety Team',
   '/privacy': 'Privacy Policy',
   '/terms': 'Terms and Conditions',
+  '/admin': 'Admin Console',
 }
 
 const pageDescriptions: Record<string, string> = {
