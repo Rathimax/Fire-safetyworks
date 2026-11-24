@@ -2,7 +2,8 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { business, customerRatings, projectPhotos, type CustomerRating, type ProjectPhoto } from './business'
 
 export const supabaseConfig = { url: import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, ''), anonKey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY }
-export const adminEmail = (import.meta.env.VITE_ADMIN_EMAIL || business.email).trim().toLowerCase()
+const allowedAdminEmails: string = import.meta.env.VITE_ADMIN_EMAIL || business.email
+export const isAdminEmail = (email?: string | null) => Boolean(email && allowedAdminEmails.split(',').some(allowed => allowed.trim().toLowerCase() === email.trim().toLowerCase()))
 
 type SiteContent = { customersServed: number; reviews: CustomerRating[]; projects: ProjectPhoto[] }
 type ReviewContentRow = { venue: string; customer: string; rating: number; location: string | null; feedback_before: string; feedback_highlight: string; feedback_after: string }

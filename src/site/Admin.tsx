@@ -7,7 +7,7 @@ import Trash2 from 'lucide-react/dist/esm/icons/trash-2.js'
 import Upload from 'lucide-react/dist/esm/icons/upload.js'
 import Eye from 'lucide-react/dist/esm/icons/eye.js'
 import EyeOff from 'lucide-react/dist/esm/icons/eye-off.js'
-import { adminEmail, supabaseConfig, useSiteContent } from '../data/site-content'
+import { isAdminEmail, supabaseConfig, useSiteContent } from '../data/site-content'
 import './admin.css'
 
 type ReviewRow = { id: string; venue: string; customer: string; rating: number; location: string | null }
@@ -56,7 +56,7 @@ export default function Admin() {
     return () => listener.subscription.unsubscribe()
   }, [])
   useEffect(() => {
-    if (session?.user.email?.toLowerCase() !== adminEmail) {
+    if (!isAdminEmail(session?.user.email)) {
       if (session) { void supabase?.auth.signOut(); setSession(null) }
       return
     }
@@ -76,7 +76,7 @@ export default function Admin() {
     const result = await supabase.auth.signInWithPassword({ email: email.trim(), password })
     setBusy(false)
     if (result.error) setError('Sign-in failed. Check your email and password, then try again.')
-    else if (result.data.user.email?.toLowerCase() !== adminEmail) {
+    else if (!isAdminEmail(result.data.user.email)) {
       await supabase.auth.signOut()
       setError('This account is not on the administrator allowlist.')
     } else setPassword('')
@@ -158,7 +158,7 @@ export default function Admin() {
 
   if (!supabase) return <main className="admin-shell"><section className="admin-login"><span className="admin-eyebrow">SHREE GANGA · ADMIN</span><h1>Admin console setup</h1><p>Add the Supabase project URL and public publishable key to <code>.env.local</code>, then add the same values to Vercel. Setup instructions are in the project README.</p></section></main>
 
-  if (!session) return <main className="admin-shell"><form className="admin-login" onSubmit={login}><span className="admin-eyebrow">SHREE GANGA · ADMIN</span><h1>Sign in</h1><p>This console is for the CEO account only.</p>{error && <p className="admin-error" role="alert">{error}</p>}<label>Email<input autoComplete="off" type="email" required value={email} onChange={event => setEmail(event.target.value)} /></label><label>Password<span className="admin-password-field"><input autoComplete="current-password" type={showPassword ? 'text' : 'password'} required value={password} onChange={event => setPassword(event.target.value)} /><button className="admin-password-toggle" type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(visible => !visible)}>{showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}</button></span></label><button disabled={busy} type="submit">{busy ? 'Signing in…' : 'Sign in'}</button></form></main>
+  if (!session) return <main className="admin-shell"><form className="admin-login" onSubmit={login}><span className="admin-eyebrow">SHREE GANGA · ADMIN</span><h1>Sign in</h1><p>This console is for authorized administrators only.</p>{error && <p className="admin-error" role="alert">{error}</p>}<label>Email<input autoComplete="off" type="email" required value={email} onChange={event => setEmail(event.target.value)} /></label><label>Password<span className="admin-password-field"><input autoComplete="current-password" type={showPassword ? 'text' : 'password'} required value={password} onChange={event => setPassword(event.target.value)} /><button className="admin-password-toggle" type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(visible => !visible)}>{showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}</button></span></label><button disabled={busy} type="submit">{busy ? 'Signing in…' : 'Sign in'}</button></form></main>
 
   return <main className="admin-shell"><div className="admin-dashboard">
     <header className="admin-top">
