@@ -241,13 +241,43 @@ function ProjectShowcaseCarousel({ projectPhotos }: { projectPhotos: ProjectPhot
 
 function Home() {
   const { customersServed, projects } = useSiteContent()
+  useEffect(() => {
+    const parallaxEnabled = window.matchMedia('(prefers-reduced-motion: no-preference)')
+    if (!parallaxEnabled.matches) return
+
+    const hero = document.querySelector<HTMLElement>('.home-page .hero')
+    const image = hero?.querySelector<HTMLElement>('.hero-image')
+    if (!hero || !image) return
+
+    let frame = 0
+    const updateParallax = () => {
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(() => {
+        const scrolled = Math.max(0, -hero.getBoundingClientRect().top)
+        const offset = Math.min(scrolled * 0.18, 96)
+        image.style.setProperty('--hero-scroll-offset', `${offset.toFixed(1)}px`)
+      })
+    }
+
+    window.addEventListener('scroll', updateParallax, { passive: true })
+    window.addEventListener('resize', updateParallax)
+    updateParallax()
+    return () => {
+      window.removeEventListener('scroll', updateParallax)
+      window.removeEventListener('resize', updateParallax)
+      cancelAnimationFrame(frame)
+      image.style.removeProperty('--hero-scroll-offset')
+    }
+  }, [])
   return <div className="home-page">
-    <section className="hero"><div className="hero-image" /><div className="hero-shade" /><div className="container hero-inner">
-      <div className="hero-copy"><span className="eyebrow eyebrow-white"><i /> INSTALLATION &amp; MAINTENANCE</span><h1>Fire safety for your building.</h1><p>Sprinklers, fire pipelines, alarms and safety equipment, installed and maintained.</p>
-        <div className="hero-actions"><Link className="button button-red" to="/contact#enquiry-form">Get a quote <ArrowUpRight size={17} /></Link><a className="button button-outline" href={`tel:${business.phone}`}><Phone size={16} /> Call us</a></div>
+    <section className="hero"><div className="hero-image" aria-hidden="true" /><div className="hero-shade" aria-hidden="true" /><div className="container hero-inner">
+      <div className="hero-copy"><h1><span className="hero-title-primary">SHREE GANGA</span><span className="hero-title-secondary">FIRE &amp; SAFETY</span></h1>
+        <ul className="hero-points" aria-label="What you can expect"><li><Check size={16} aria-hidden="true" /> Quality products</li><li><Check size={16} aria-hidden="true" /> Careful installation</li><li><Check size={16} aria-hidden="true" /> Clear communication</li><li><Check size={16} aria-hidden="true" /> Customer satisfaction</li></ul>
+        <div className="hero-right-copy"><span className="eyebrow"><i /> INSTALLATION &amp; MAINTENANCE</span><p className="hero-subtitle">For your building.</p><p className="hero-description">Sprinklers, fire pipelines, alarms and safety equipment, installed and maintained.</p>
+          <div className="hero-actions"><Link className="button button-red" to="/contact#enquiry-form">Get a quote <ArrowUpRight size={17} /></Link><a className="button button-outline" href={`tel:${business.phone}`}><Phone size={16} /> Call us</a></div>
+        </div>
         <ul className="hero-trust" aria-label="Service details"><li><b><AnimatedCount value={customersServed}/></b><span>customers served</span></li><li><b>Careful work</b><span>Attention to products and installation</span></li><li><b>Serving</b><span>{business.serviceAreas.join(' · ')}</span></li></ul>
       </div>
-      <div className="hero-note"><span>FIRE SAFETY INSTALLATION</span><span>Illustrative image</span></div>
       <a className="scroll-cue" href="#services"><ArrowDown size={16} /> See our services</a>
     </div><div className="hero-side-mark" aria-hidden="true">S G / 01</div></section>
     <section className="trust-strip"><div className="container trust-grid"><div className="trust-stat"><img src="/images/trust-customers.png" alt="" aria-hidden="true"/><strong><AnimatedCount value={customersServed}/></strong><span>Customers served</span></div><div className="trust-item"><img src="/images/trust-careful-work.png" alt="" aria-hidden="true"/><div><b>Careful work</b><span>Attention to products and installation</span></div></div><div className="trust-item"><img src="/images/trust-serving.png" alt="" aria-hidden="true"/><div><b>Serving</b><span>{business.serviceAreas.join(' · ')}</span></div></div></div></section>
@@ -463,6 +493,7 @@ function NotFound() { return <PageIntro eyebrow="PAGE NOT FOUND" title="Page not
 export default function App() {
   const location = useLocation()
   const isAdmin = location.pathname.startsWith('/admin')
+  const [homeHeroVisible, setHomeHeroVisible] = useState(location.pathname === '/')
   // biome-ignore lint/correctness/useExhaustiveDependencies: scroll to the top after route navigation.
   useEffect(() => {
     if (location.hash) {
@@ -473,5 +504,20 @@ export default function App() {
       })
     } else window.scrollTo(0, 0)
   }, [location.pathname, location.hash])
-  return <><Metadata/>{!isAdmin && <Header/>}<main key={`${location.pathname}${location.search}`} className="page-transition"><Routes><Route path="/" element={<Home/>}/><Route path="/about" element={<About/>}/><Route path="/services" element={<Services/>}/><Route path="/services/:slug" element={<ServiceDetail/>}/><Route path="/projects" element={<Projects/>}/><Route path="/reviews" element={<Testimonials/>}/><Route path="/testimonials" element={<Navigate to="/reviews" replace/>}/><Route path="/contact" element={<Contact/>}/><Route path="/privacy" element={<Legal type="privacy"/>}/><Route path="/terms" element={<Legal type="terms"/>}/><Route path="/admin" element={<Suspense fallback={<div className="admin-shell" aria-busy="true"/>}><Admin/></Suspense>}/><Route path="*" element={<NotFound/>}/></Routes></main>{!isAdmin && <><Footer/><WhatsAppFloat/><div className="mobile-contact"><a href={`tel:${business.phone}`}><Phone size={16}/> Call</a><a href={`https://wa.me/${business.whatsapp}?text=${encodeURIComponent('Hello, I would like to ask about fire safety work.')}`} target="_blank" rel="noreferrer"><img className="whatsapp-icon" src="/images/whatsapp.svg" alt=""/> WhatsApp</a><Link to="/contact#enquiry-form">Get a quote <ArrowUpRight size={15}/></Link></div><button type="button" className="back-top" onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} aria-label="Scroll to top"><ChevronDown size={16}/></button></>}</>
+  useEffect(() => {
+    if (location.pathname !== '/') {
+      setHomeHeroVisible(false)
+      return
+    }
+    const hero = document.querySelector('.home-page .hero')
+    if (!hero) {
+      setHomeHeroVisible(false)
+      return
+    }
+    setHomeHeroVisible(true)
+    const observer = new IntersectionObserver(([entry]) => setHomeHeroVisible(entry.isIntersecting), { threshold: 0 })
+    observer.observe(hero)
+    return () => observer.disconnect()
+  }, [location.pathname])
+  return <><Metadata/>{!isAdmin && <Header/>}<main key={`${location.pathname}${location.search}`} className="page-transition"><Routes><Route path="/" element={<Home/>}/><Route path="/about" element={<About/>}/><Route path="/services" element={<Services/>}/><Route path="/services/:slug" element={<ServiceDetail/>}/><Route path="/projects" element={<Projects/>}/><Route path="/reviews" element={<Testimonials/>}/><Route path="/testimonials" element={<Navigate to="/reviews" replace/>}/><Route path="/contact" element={<Contact/>}/><Route path="/privacy" element={<Legal type="privacy"/>}/><Route path="/terms" element={<Legal type="terms"/>}/><Route path="/admin" element={<Suspense fallback={<div className="admin-shell" aria-busy="true"/>}><Admin/></Suspense>}/><Route path="*" element={<NotFound/>}/></Routes></main>{!isAdmin && <><Footer/>{!homeHeroVisible && <WhatsAppFloat/>}<div className="mobile-contact"><a href={`tel:${business.phone}`}><Phone size={16}/> Call</a><a href={`https://wa.me/${business.whatsapp}?text=${encodeURIComponent('Hello, I would like to ask about fire safety work.')}`} target="_blank" rel="noreferrer"><img className="whatsapp-icon" src="/images/whatsapp.svg" alt=""/> WhatsApp</a><Link to="/contact#enquiry-form">Get a quote <ArrowUpRight size={15}/></Link></div>{!homeHeroVisible && <button type="button" className="back-top" onClick={()=>window.scrollTo({top:0,behavior:'smooth'})} aria-label="Scroll to top"><ChevronDown size={16}/></button>}</>}</>
 }
