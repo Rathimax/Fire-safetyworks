@@ -1054,8 +1054,8 @@ main.page-transition, .footer {
 .dark .theme-toggle { color: var(--foreground); }
 .dark .theme-toggle:hover { border-color: var(--chart-1); color: var(--chart-1); }
 .dark .mobile-contact { color: var(--foreground); background-color: transparent; }
-.dark .mobile-contact a:first-child { background: rgb(41 37 36 / 76%); }
-.dark .mobile-contact a:last-child { background: rgb(185 28 28 / 74%); }
+.dark .mobile-contact a:first-child { background: rgb(41 37 36 / 84%); }
+.dark .mobile-contact a:last-child { background: rgb(185 28 28 / 84%); }
 .dark .nav a, .dark .mobile-contact a:first-child, .dark .back-top, .dark .menu-toggle { color: var(--foreground); }
 .dark .nav a:hover, .dark .nav a.active { color: var(--chart-1); }
 .dark .nav > a { border-color: var(--border); }
@@ -1077,57 +1077,46 @@ main.page-transition, .footer {
   .nav .theme-toggle-label { display: inline; font-size: 13px; }
   .nav .theme-toggle:hover { background: transparent; }
   :root .nav {
-    background-color: rgb(250 247 245 / 65%);
+    background-color: rgb(250 247 245 / 84%);
     border-bottom: 1px solid rgb(28 25 23 / 10%);
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
   }
   .dark .nav {
-    background-color: rgb(28 25 23 / 65%);
+    background-color: rgb(28 25 23 / 84%);
     border-bottom-color: rgb(255 255 255 / 12%);
   }
   .header.header-menu-open {
-    background: rgb(250 247 245 / 65%);
+    background: rgb(250 247 245 / 88%);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
-  .header.header-menu-open::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    backdrop-filter: blur(16px) saturate(160%);
-    -webkit-backdrop-filter: blur(16px) saturate(160%);
-  }
   .dark .header.header-menu-open {
-    background: rgb(28 25 23 / 65%);
+    background: rgb(28 25 23 / 88%);
   }
   .mobile-contact {
     border-top: 1px solid var(--section-divider);
     background-color: transparent;
     box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
   }
   .mobile-contact a {
     color: var(--foreground);
-    background: rgb(250 247 245 / 76%);
-    backdrop-filter: blur(18px) saturate(160%);
-    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    background: rgb(250 247 245 / 84%);
   }
   .mobile-contact a:nth-child(2) {
     color: #16794b;
-    background: rgb(228 242 233 / 74%);
+    background: rgb(228 242 233 / 82%);
   }
   .mobile-contact a:last-child {
     color: #fff;
-    background: rgb(155 44 44 / 76%);
+    background: rgb(155 44 44 / 86%);
   }
   .visual-label, .approach-photo span, .about-image span, .detail-image span { font-size: 8px; letter-spacing: .1em; }
   .header { width: 100%; max-width: none; border-radius: 0; }
   .header-scrolled { top: 0; width: 100%; box-shadow: none; }
-  .header .nav { position: absolute; top: 100%; right: 0; bottom: auto; left: 0; z-index: 50; max-height: calc(100dvh - 70px); overflow-y: auto; }
+  .header .nav { position: fixed; top: 70px; right: 0; bottom: auto; left: 0; z-index: 50; max-height: calc(100dvh - 70px); overflow-y: auto; }
   .hero-inner { justify-content: flex-start; padding-top: clamp(32px, 6svh, 56px); }
   .hero-trust { display: none; }
   .scroll-cue { position: static; bottom: auto; left: auto; align-self: flex-start; margin: clamp(32px, 6svh, 52px) 0 0; }
@@ -1149,33 +1138,24 @@ main.page-transition, .footer {
 }
 
 @media (max-height: 500px) and (orientation: landscape) {
-  .header .nav { position: absolute; top: 100%; right: 0; bottom: auto; left: 0; z-index: 50; max-height: calc(100dvh - 70px); overflow-y: auto; }
+  .header .nav { position: fixed; top: 70px; right: 0; bottom: auto; left: 0; z-index: 50; max-height: calc(100dvh - 70px); overflow-y: auto; }
   :root .nav {
-    background-color: rgb(250 247 245 / 65%);
+    background-color: rgb(250 247 245 / 84%);
     border-bottom: 1px solid rgb(28 25 23 / 10%);
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
   }
   .dark .nav {
-    background-color: rgb(28 25 23 / 65%);
+    background-color: rgb(28 25 23 / 84%);
     border-bottom-color: rgb(255 255 255 / 12%);
   }
   .header.header-menu-open {
-    background: rgb(250 247 245 / 65%);
+    background: rgb(250 247 245 / 88%);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
-  .header.header-menu-open::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    backdrop-filter: blur(16px) saturate(160%);
-    -webkit-backdrop-filter: blur(16px) saturate(160%);
-  }
   .dark .header.header-menu-open {
-    background: rgb(28 25 23 / 65%);
+    background: rgb(28 25 23 / 88%);
   }
 }
 
