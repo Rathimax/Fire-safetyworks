@@ -36,7 +36,6 @@
   border-radius: calc(var(--radius) + 4px);
   background: var(--admin-glass-elevated);
   backdrop-filter: blur(18px) saturate(165%);
-  -webkit-backdrop-filter: blur(18px) saturate(165%);
 }
 
 .admin-brand {
@@ -193,7 +192,6 @@
   border: 1px solid var(--admin-glass-border);
   box-shadow: 0 12px 36px rgb(0 0 0 / 12%);
   backdrop-filter: blur(8px) saturate(150%);
-  -webkit-backdrop-filter: blur(8px) saturate(150%);
 }
 
 .admin-eyebrow {
@@ -244,7 +242,6 @@
   background: var(--admin-glass-input);
   color: var(--foreground);
   backdrop-filter: blur(6px) saturate(140%);
-  -webkit-backdrop-filter: blur(6px) saturate(140%);
 }
 
 .admin-login button:not(.admin-password-toggle),
@@ -264,7 +261,6 @@
   font-weight: 700;
   box-shadow: none;
   backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
 }
 
 .admin-login button:not(.admin-password-toggle):hover,
@@ -371,7 +367,6 @@
   font-size: 13px;
   font-weight: 600;
   backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
 }
 
 .admin-secondary:hover {
@@ -392,7 +387,6 @@
   border-radius: var(--radius);
   background: var(--admin-glass-elevated);
   backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
   scrollbar-width: none;
 }
 
@@ -435,7 +429,6 @@
   border-radius: calc(var(--radius) + 4px);
   background: var(--admin-glass-surface);
   backdrop-filter: blur(6px) saturate(145%);
-  -webkit-backdrop-filter: blur(6px) saturate(145%);
   transition: border-color .18s ease;
 }
 
@@ -478,7 +471,6 @@
   border-radius: calc(var(--radius) + 4px);
   background: var(--admin-glass-surface);
   backdrop-filter: blur(6px) saturate(145%);
-  -webkit-backdrop-filter: blur(6px) saturate(145%);
   scroll-margin-top: 96px;
 }
 
@@ -557,7 +549,6 @@
   font-weight: 700;
   list-style: none;
   backdrop-filter: blur(8px) saturate(145%);
-  -webkit-backdrop-filter: blur(8px) saturate(145%);
 }
 
 .admin-add summary::-webkit-details-marker {
@@ -583,7 +574,6 @@
   border-radius: var(--radius);
   background: var(--admin-glass-elevated);
   backdrop-filter: blur(8px) saturate(145%);
-  -webkit-backdrop-filter: blur(8px) saturate(145%);
 }
 
 .admin-content-form label {
@@ -650,7 +640,6 @@
   font-size: 12px;
   font-weight: 700;
   backdrop-filter: blur(8px) saturate(145%);
-  -webkit-backdrop-filter: blur(8px) saturate(145%);
 }
 
 .admin-load-more:hover {
@@ -863,7 +852,6 @@
   color: var(--foreground);
   box-shadow: 0 20px 60px #0003;
   backdrop-filter: blur(18px) saturate(160%);
-  -webkit-backdrop-filter: blur(18px) saturate(160%);
 }
 
 .admin-confirm-dialog::backdrop {
