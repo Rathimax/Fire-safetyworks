@@ -1089,7 +1089,7 @@ main.page-transition, .footer {
   .dark .header.header-menu-open {
     background: transparent;
   }
-  .header.header-menu-open .header-inner {
+  .header.header-menu-open :is(.brand, .menu-toggle) {
     position: relative;
     z-index: 51;
   }
@@ -1117,7 +1117,7 @@ main.page-transition, .footer {
   .visual-label, .approach-photo span, .about-image span, .detail-image span { font-size: 8px; letter-spacing: .1em; }
   .header { width: 100%; max-width: none; border-radius: 0; }
   .header-scrolled { top: 0; width: 100%; box-shadow: none; }
-  .header .nav { position: fixed; top: 0; right: 0; bottom: auto; left: 0; z-index: 50; max-height: 100dvh; overflow-y: auto; padding-top: 76px; }
+  .header .nav { position: fixed; top: 0; right: 0; bottom: auto; left: 0; z-index: 50; max-height: 100dvh; overflow-y: auto; padding-top: 70px; }
   .hero-inner { justify-content: flex-start; padding-top: clamp(32px, 6svh, 56px); }
   .hero-trust { display: none; }
   .scroll-cue { position: static; bottom: auto; left: auto; align-self: flex-start; margin: clamp(32px, 6svh, 52px) 0 0; }
@@ -1139,7 +1139,7 @@ main.page-transition, .footer {
 }
 
 @media (max-height: 500px) and (orientation: landscape) {
-  .header .nav { position: fixed; top: 0; right: 0; bottom: auto; left: 0; z-index: 50; max-height: 100dvh; overflow-y: auto; padding-top: 76px; }
+  .header .nav { position: fixed; top: 0; right: 0; bottom: auto; left: 0; z-index: 50; max-height: 100dvh; overflow-y: auto; padding-top: 70px; }
   :root .nav {
     background-color: rgb(250 247 245 / 84%);
     border-bottom: 1px solid rgb(28 25 23 / 10%);
@@ -1158,7 +1158,7 @@ main.page-transition, .footer {
   .dark .header.header-menu-open {
     background: transparent;
   }
-  .header.header-menu-open .header-inner {
+  .header.header-menu-open :is(.brand, .menu-toggle) {
     position: relative;
     z-index: 51;
   }
