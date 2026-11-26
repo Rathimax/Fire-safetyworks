@@ -1079,11 +1079,20 @@ main.page-transition, .footer {
     border-bottom-color: rgb(255 255 255 / 12%);
   }
   .header.header-menu-open {
-    background: rgb(250 247 245 / 88%);
+    background: transparent;
+    border-bottom-color: transparent;
+    box-shadow: none;
     backdrop-filter: none;
   }
   .dark .header.header-menu-open {
-    background: rgb(28 25 23 / 88%);
+    background: transparent;
+  }
+  .header.header-menu-open .header-inner {
+    position: relative;
+    z-index: 51;
+  }
+  .header.header-menu-open .nav > a:first-child {
+    border-top: 1px solid var(--section-divider);
   }
   .mobile-contact {
     border-top: 1px solid var(--section-divider);
@@ -1106,7 +1115,7 @@ main.page-transition, .footer {
   .visual-label, .approach-photo span, .about-image span, .detail-image span { font-size: 8px; letter-spacing: .1em; }
   .header { width: 100%; max-width: none; border-radius: 0; }
   .header-scrolled { top: 0; width: 100%; box-shadow: none; }
-  .header .nav { position: fixed; top: 70px; right: 0; bottom: auto; left: 0; z-index: 50; max-height: calc(100dvh - 70px); overflow-y: auto; }
+  .header .nav { position: fixed; top: 0; right: 0; bottom: auto; left: 0; z-index: 50; max-height: 100dvh; overflow-y: auto; padding-top: 76px; }
   .hero-inner { justify-content: flex-start; padding-top: clamp(32px, 6svh, 56px); }
   .hero-trust { display: none; }
   .scroll-cue { position: static; bottom: auto; left: auto; align-self: flex-start; margin: clamp(32px, 6svh, 52px) 0 0; }
@@ -1128,7 +1137,7 @@ main.page-transition, .footer {
 }
 
 @media (max-height: 500px) and (orientation: landscape) {
-  .header .nav { position: fixed; top: 70px; right: 0; bottom: auto; left: 0; z-index: 50; max-height: calc(100dvh - 70px); overflow-y: auto; }
+  .header .nav { position: fixed; top: 0; right: 0; bottom: auto; left: 0; z-index: 50; max-height: 100dvh; overflow-y: auto; padding-top: 76px; }
   :root .nav {
     background-color: rgb(250 247 245 / 84%);
     border-bottom: 1px solid rgb(28 25 23 / 10%);
@@ -1139,11 +1148,20 @@ main.page-transition, .footer {
     border-bottom-color: rgb(255 255 255 / 12%);
   }
   .header.header-menu-open {
-    background: rgb(250 247 245 / 88%);
+    background: transparent;
+    border-bottom-color: transparent;
+    box-shadow: none;
     backdrop-filter: none;
   }
   .dark .header.header-menu-open {
-    background: rgb(28 25 23 / 88%);
+    background: transparent;
+  }
+  .header.header-menu-open .header-inner {
+    position: relative;
+    z-index: 51;
+  }
+  .header.header-menu-open .nav > a:first-child {
+    border-top: 1px solid var(--section-divider);
   }
 }
 
