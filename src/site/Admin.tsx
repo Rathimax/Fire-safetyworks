@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
 import type { Session } from '@supabase/supabase-js'
 import { createClient } from '@supabase/supabase-js'
+import ArrowUpRight from 'lucide-react/dist/esm/icons/arrow-up-right.js'
 import LogOut from 'lucide-react/dist/esm/icons/log-out.js'
+import Moon from 'lucide-react/dist/esm/icons/moon.js'
 import Plus from 'lucide-react/dist/esm/icons/plus.js'
+import RefreshCw from 'lucide-react/dist/esm/icons/refresh-cw.js'
+import Sun from 'lucide-react/dist/esm/icons/sun.js'
 import Trash2 from 'lucide-react/dist/esm/icons/trash-2.js'
 import Upload from 'lucide-react/dist/esm/icons/upload.js'
 import Eye from 'lucide-react/dist/esm/icons/eye.js'
@@ -33,6 +38,8 @@ export default function Admin() {
   const [reviewForm, setReviewForm] = useState(emptyReview)
   const [projectForm, setProjectForm] = useState({ title: '', category: '', alt: '' })
   const [photo, setPhoto] = useState<File | null>(null)
+  const [refreshing, setRefreshing] = useState(false)
+  const [darkMode, setDarkMode] = useState(() => typeof document !== 'undefined' && document.documentElement.classList.contains('dark'))
   const { refresh: refreshPublicContent } = useSiteContent()
 
   const loadRecords = useCallback(async () => {
@@ -68,6 +75,32 @@ export default function Admin() {
     if (showLogoutConfirmation && !dialog.open) dialog.showModal()
     else if (!showLogoutConfirmation && dialog.open) dialog.close()
   }, [showLogoutConfirmation])
+  useEffect(() => {
+    const root = document.documentElement
+    const syncTheme = () => setDarkMode(root.classList.contains('dark'))
+    const observer = new MutationObserver(syncTheme)
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+
+  const toggleTheme = () => {
+    const next = !darkMode
+    document.documentElement.classList.toggle('dark', next)
+    try { window.localStorage.setItem('fire-safety-theme', next ? 'dark' : 'light') } catch { /* Theme still changes for this session. */ }
+    setDarkMode(next)
+  }
+
+  const refreshConsoleData = async () => {
+    if (!supabase || refreshing || busy) return
+    setRefreshing(true); setError('')
+    try {
+      await Promise.all([loadRecords(), refreshPublicContent()])
+    } catch {
+      setError('Could not refresh console data. Check your connection and administrator access.')
+    } finally {
+      setRefreshing(false)
+    }
+  }
 
   const login = async (event: FormEvent) => {
     event.preventDefault()
@@ -156,16 +189,82 @@ export default function Admin() {
     setBusy(false); await loadRecords(); await refreshPublicContent()
   }
 
-  if (!supabase) return <main className="admin-shell"><section className="admin-login"><span className="admin-eyebrow">SHREE GANGA · ADMIN</span><h1>Admin console setup</h1><p>Add the Supabase project URL and public publishable key to <code>.env.local</code>, then add the same values to Vercel. Setup instructions are in the project README.</p></section></main>
-
-  if (!session) return <main className="admin-shell"><form className="admin-login" onSubmit={login}><span className="admin-eyebrow">SHREE GANGA · ADMIN</span><h1>Sign in</h1><p>This console is for authorized administrators only.</p>{error && <p className="admin-error" role="alert">{error}</p>}<label>Email<input autoComplete="off" type="email" required value={email} onChange={event => setEmail(event.target.value)} /></label><label>Password<span className="admin-password-field"><input autoComplete="current-password" type={showPassword ? 'text' : 'password'} required value={password} onChange={event => setPassword(event.target.value)} /><button className="admin-password-toggle" type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(visible => !visible)}>{showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}</button></span></label><button disabled={busy} type="submit">{busy ? 'Signing in…' : 'Sign in'}</button></form></main>
-
-  return <main className="admin-shell"><div className="admin-dashboard">
-    <header className="admin-top">
-      <div className="admin-heading"><span className="admin-eyebrow">SHREE GANGA · ADMIN</span><h1>Content manager</h1><p>Manage the information customers see on your website.</p></div>
-      <div className="admin-account"><span title={session.user.email || ''}>{session.user.email}</span><button type="button" className="admin-secondary" disabled={busy} onClick={() => setShowLogoutConfirmation(true)}><LogOut size={16}/> Sign out</button></div>
+  const adminNavbar = (
+    <header className="admin-topbar">
+      <Link className="admin-brand" to="/" aria-label="Go to Shree Ganga public website">
+        <span className="admin-brand-mark" aria-hidden="true">
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 54">
+            <path d="M24 3 43 10v14c0 13-8 22-19 27C13 46 5 37 5 24V10L24 3Z" fill="none" stroke="currentColor" strokeWidth="2.5" />
+            <path d="M24 14c1 7-6 9-6 16a6 6 0 0 0 12 0c0-4-3-7-3-12 5 5 9 10 9 16a12 12 0 1 1-24 0c0-8 6-13 12-20Z" fill="currentColor" />
+          </svg>
+        </span>
+        <span className="admin-brand-type">
+          <b>SHREE GANGA</b>
+          <small>ADMIN CONSOLE</small>
+        </span>
+      </Link>
+      {session && (
+        <nav className="admin-topbar-nav" aria-label="Admin sections">
+          <a href="#admin-overview">Overview</a>
+          <a href="#admin-count">Customers</a>
+          <a href="#admin-projects">Projects</a>
+          <a href="#admin-reviews">Reviews</a>
+        </nav>
+      )}
+      <div className="admin-topbar-tools">
+        {session && (
+          <button
+            type="button"
+            className="admin-tool-btn"
+            disabled={refreshing || busy}
+            onClick={() => void refreshConsoleData()}
+            aria-label="Refresh console data"
+            title="Refresh console data"
+          >
+            <RefreshCw size={16} className={refreshing ? 'is-spinning' : undefined} aria-hidden="true" />
+            <span>{refreshing ? 'Syncing…' : 'Refresh'}</span>
+          </button>
+        )}
+        <Link className="admin-tool-btn" to="/" title="View public website">
+          <ArrowUpRight size={15} aria-hidden="true" />
+          <span>View site</span>
+        </Link>
+        <button
+          type="button"
+          className="admin-tool-btn"
+          onClick={toggleTheme}
+          aria-label={`Switch to ${darkMode ? 'light' : 'dark'} theme`}
+          title={`Switch to ${darkMode ? 'light' : 'dark'} theme`}
+        >
+          {darkMode ? <Moon size={15} aria-hidden="true" /> : <Sun size={15} aria-hidden="true" />}
+          <span>{darkMode ? 'Light' : 'Dark'}</span>
+        </button>
+        {session && (
+          <button
+            type="button"
+            className="admin-tool-btn admin-tool-danger"
+            disabled={busy}
+            onClick={() => setShowLogoutConfirmation(true)}
+            aria-label="Sign out"
+            title="Sign out"
+          >
+            <LogOut size={15} aria-hidden="true" />
+            <span>Sign out</span>
+          </button>
+        )}
+      </div>
     </header>
-    <nav className="admin-nav" aria-label="Admin sections"><a href="#admin-overview">Overview</a><a href="#admin-projects">Projects</a><a href="#admin-reviews">Reviews</a></nav>
+  )
+
+  if (!supabase) return <main className="admin-shell">{adminNavbar}<section className="admin-login"><span className="admin-eyebrow">SHREE GANGA · ADMIN</span><h1>Admin console setup</h1><p>Add the Supabase project URL and public publishable key to <code>.env.local</code>, then add the same values to Vercel. Setup instructions are in the project README.</p></section></main>
+
+  if (!session) return <main className="admin-shell">{adminNavbar}<form className="admin-login" onSubmit={login}><span className="admin-eyebrow">SHREE GANGA · ADMIN</span><h1>Sign in</h1><p>This console is for authorized administrators only.</p>{error && <p className="admin-error" role="alert">{error}</p>}<label>Email<input autoComplete="off" type="email" required value={email} onChange={event => setEmail(event.target.value)} /></label><label>Password<span className="admin-password-field"><input autoComplete="current-password" type={showPassword ? 'text' : 'password'} required value={password} onChange={event => setPassword(event.target.value)} /><button className="admin-password-toggle" type="button" aria-label={showPassword ? 'Hide password' : 'Show password'} aria-pressed={showPassword} onClick={() => setShowPassword(visible => !visible)}>{showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}</button></span></label><button disabled={busy} type="submit">{busy ? 'Signing in…' : 'Sign in'}</button></form></main>
+
+  return <main className="admin-shell">{adminNavbar}<div className="admin-dashboard">
+    <div className="admin-top">
+      <div className="admin-heading"><span className="admin-eyebrow">SHREE GANGA · ADMIN</span><h1>Content manager</h1><p>Manage the information customers see on your website.</p></div>
+      <div className="admin-account"><span title={session.user.email || ''}>{session.user.email}</span></div>
+    </div>
     {error && <p className="admin-error" role="alert">{error}</p>}
 
     <section className="admin-stats" id="admin-overview" aria-label="Website content summary">
