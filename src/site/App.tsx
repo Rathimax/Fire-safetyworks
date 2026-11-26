@@ -72,10 +72,10 @@ function BrandMark() {
   return <svg role="presentation" viewBox="0 0 48 54"><path d="M24 3 43 10v14c0 13-8 22-19 27C13 46 5 37 5 24V10L24 3Z" fill="none" stroke="currentColor" strokeWidth="2.5"/><path d="M24 14c1 7-6 9-6 16a6 6 0 0 0 12 0c0-4-3-7-3-12 5 5 9 10 9 16a12 12 0 1 1-24 0c0-8 6-13 12-20Z" fill="currentColor"/></svg>
 }
 
-function Logo({ onClick, animateMark = false, darkMode = false }: { onClick?: () => void; animateMark?: boolean; darkMode?: boolean }) {
+function Logo({ onClick, usePng = false }: { onClick?: () => void; usePng?: boolean }) {
   return <Link className="brand" to="/" aria-label={`${business.name}, home`} onClick={onClick}>
-    <span className={animateMark ? 'brand-mark brand-mark-animated' : 'brand-mark'} aria-hidden="true">
-      {animateMark ? <Suspense fallback={<BrandMark />}><GlassIconReveal className="header-brand-reveal" logo={SHREE_GANGA_MARK} background={darkMode ? '#1c1917' : '#faf7f5'} logoColor={darkMode ? '#f87171' : '#9b2c2c'} tileSize={48} logoScale={1.45} finalScale={1.1} loop={false} label="Shree Ganga" /></Suspense> : <BrandMark />}
+    <span className="brand-mark" aria-hidden="true">
+      {usePng ? <img className="brand-mark-img" src="/images/shree-ganga-mark.png" alt="" /> : <BrandMark />}
     </span>
     <span className="brand-type"><b>SHREE GANGA</b><small>FIRE &amp; SAFETY</small></span>
   </Link>
@@ -102,7 +102,7 @@ function Header() {
     try { window.localStorage.setItem('fire-safety-theme', next ? 'dark' : 'light') } catch { /* Theme still changes for this session. */ }
     setDarkMode(next)
   }
-  return <header className={`header${scrolled ? ' header-scrolled' : ''}${open ? ' header-menu-open' : ''}`}><div className="container header-inner"><Logo animateMark darkMode={darkMode} />
+  return <header className={`header${scrolled ? ' header-scrolled' : ''}${open ? ' header-menu-open' : ''}`}><div className="container header-inner"><Logo usePng />
     <button type="button" className="menu-toggle" aria-label={open ? 'Close navigation' : 'Open navigation'} aria-controls="primary-navigation" aria-expanded={open} onClick={() => setOpen(!open)}>{open ? <X /> : <Menu />}</button>
     <nav id="primary-navigation" className={open ? 'nav nav-open' : 'nav'} aria-label="Main navigation">
       {navLinks.map(item => {

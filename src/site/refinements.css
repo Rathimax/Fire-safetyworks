@@ -703,6 +703,8 @@ main.page-transition { animation: page-content-in 290ms cubic-bezier(.22, 1, .36
 .founder-brand-reveal { width: 190px; height: 190px; margin: 26px auto 12px; flex: 0 0 auto; }
 @media (max-width: 680px) { .founder-brand-reveal { width: 150px; height: 150px; margin: 18px auto; } }
 
+.brand-mark-img { width: 100%; height: 100%; object-fit: contain; }
+.dark .header .brand-mark-img { filter: brightness(0) saturate(100%) invert(65%) sepia(54%) saturate(2352%) hue-rotate(319deg) brightness(101%) contrast(94%); }
 .brand-mark-animated { width: 52px; height: 52px; flex: 0 0 auto; }
 .header-brand-reveal { width: 100%; height: 100%; }
 @media (max-width: 680px) { .brand-mark-animated { width: 46px; height: 46px; } }
