@@ -325,19 +325,19 @@ main.page-transition { animation: page-content-in 290ms cubic-bezier(.22, 1, .36
   .legal-content { padding-top: 48px; padding-bottom: 60px; }
   .legal-inner p { font-size: 14px; line-height: 1.75; }
   .legal-inner h2 { font-size: 20px; margin-top: 25px; }
-  .footer { padding-top: 38px; }
-  .footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 14px; padding-bottom: 24px; }
+  .footer { padding-top: 34px; }
+  .footer-grid { grid-template-columns: minmax(0, 1fr); gap: 22px; padding-bottom: 22px; }
   .footer-brand { grid-column: 1 / -1; }
-  .footer-brand p { margin: 14px 0 10px; font-size: 13px; line-height: 1.6; }
-  .footer-contact { gap: 4px; font-size: 13px; }
+  .footer-brand p { margin: 12px 0; font-size: 13px; line-height: 1.6; }
+  .footer-contact { flex-direction: row; flex-wrap: wrap; gap: 4px 18px; font-size: 13px; }
   .footer-contact a { min-height: 44px; }
-  .footer-grid > div.footer-links { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 2px 10px; }
-  .footer-grid > div.footer-services { grid-column: auto; }
-  .footer-links h3 { grid-column: 1 / -1; margin: 0 0 4px; }
+  .footer-grid > div.footer-links { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 2px 16px; padding-top: 18px; border-top: 1px solid var(--section-divider); }
+  .footer-grid > div.footer-services { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .footer-links h3 { grid-column: 1 / -1; margin: 0 0 6px; }
   .footer-grid > div.footer-links a { display: flex; min-height: 44px; align-items: center; font-size: 13px; line-height: 1.35; }
-  .footer-area-list { grid-column: 1 / -1; max-width: none; margin-top: 2px; font-size: 12px; line-height: 1.5; }
-  .footer-bottom { gap: 8px; font-size: 11px; }
-  .footer-bottom div { min-height: 44px; align-items: center; gap: 22px; }
+  .footer-area-list { grid-column: 1 / -1; max-width: none; margin-top: 8px; padding-top: 10px; border-top: 1px dashed var(--section-divider); font-size: 12px; line-height: 1.55; }
+  .footer-bottom { gap: 6px; padding-top: 14px; padding-bottom: calc(82px + env(safe-area-inset-bottom)); font-size: 11px; }
+  .footer-bottom div { min-height: 44px; align-items: center; gap: 20px; }
   .footer-bottom a { display: inline-flex; min-height: 44px; align-items: center; }
   .mobile-contact { height: auto; min-height: 58px; padding-bottom: env(safe-area-inset-bottom); }
   .mobile-contact a { min-height: 48px; font-size: 12px; }
